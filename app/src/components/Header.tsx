@@ -5,8 +5,23 @@ type HeaderProps = {
   onLogoClick?: () => void;
 };
 
+type NavKey = 'home' | 'flights' | 'manage' | 'checkin' | 'contact';
+
 export default function Header({ onLogoClick }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [active, setActive] = useState<NavKey>('checkin');
+  const handleNav = (name: NavKey) => {
+    setActive(name);
+    setIsMenuOpen(false);
+  };
+  const desktopClass = (name: NavKey) =>
+    name === active
+      ? 'text-sky-600 font-semibold border-b-2 border-sky-600 pb-1'
+      : 'text-slate-700 hover:text-sky-600 transition-colors font-medium';
+  const mobileClass = (name: NavKey) =>
+    name === active
+      ? 'px-2 py-2 rounded font-semibold text-sky-700 bg-sky-50'
+      : 'px-2 py-2 rounded hover:bg-slate-50';
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-sky-100">
@@ -28,11 +43,11 @@ export default function Header({ onLogoClick }: HeaderProps) {
           </button>
 
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-slate-700 hover:text-sky-600 transition-colors font-medium">Home</a>
-            <a href="#" className="text-slate-700 hover:text-sky-600 transition-colors font-medium">Flights</a>
-            <a href="#" className="text-slate-700 hover:text-sky-600 transition-colors font-medium">Manage Booking</a>
-            <a href="#" className="text-sky-600 font-semibold border-b-2 border-sky-600 pb-1">Check-in</a>
-            <a href="#" className="text-slate-700 hover:text-sky-600 transition-colors font-medium">Contact</a>
+            <a href="#home" onClick={() => handleNav('home')} className={desktopClass('home')} aria-current={active === 'home' ? 'page' : undefined}>Home</a>
+            <a href="#flights" onClick={() => handleNav('flights')} className={desktopClass('flights')} aria-current={active === 'flights' ? 'page' : undefined}>Flights</a>
+            <a href="#manage" onClick={() => handleNav('manage')} className={desktopClass('manage')} aria-current={active === 'manage' ? 'page' : undefined}>Manage Booking</a>
+            <a href="#checkin" onClick={() => handleNav('checkin')} className={desktopClass('checkin')} aria-current={active === 'checkin' ? 'page' : undefined}>Check-in</a>
+            <a href="#contact" onClick={() => handleNav('contact')} className={desktopClass('contact')} aria-current={active === 'contact' ? 'page' : undefined}>Contact</a>
           </div>
 
           <div className="md:hidden">
@@ -50,11 +65,11 @@ export default function Header({ onLogoClick }: HeaderProps) {
         {isMenuOpen && (
           <div role="menu" className="md:hidden py-3 border-t border-slate-200">
             <div className="flex flex-col space-y-2">
-              <a href="#" className="px-2 py-2 rounded hover:bg-slate-50">Home</a>
-              <a href="#" className="px-2 py-2 rounded hover:bg-slate-50">Flights</a>
-              <a href="#" className="px-2 py-2 rounded hover:bg-slate-50">Manage Booking</a>
-              <a href="#" className="px-2 py-2 rounded hover:bg-slate-50 font-semibold text-sky-700">Check-in</a>
-              <a href="#" className="px-2 py-2 rounded hover:bg-slate-50">Contact</a>
+              <a href="#home" onClick={() => handleNav('home')} className={mobileClass('home')} aria-current={active === 'home' ? 'page' : undefined}>Home</a>
+              <a href="#flights" onClick={() => handleNav('flights')} className={mobileClass('flights')} aria-current={active === 'flights' ? 'page' : undefined}>Flights</a>
+              <a href="#manage" onClick={() => handleNav('manage')} className={mobileClass('manage')} aria-current={active === 'manage' ? 'page' : undefined}>Manage Booking</a>
+              <a href="#checkin" onClick={() => handleNav('checkin')} className={mobileClass('checkin')} aria-current={active === 'checkin' ? 'page' : undefined}>Check-in</a>
+              <a href="#contact" onClick={() => handleNav('contact')} className={mobileClass('contact')} aria-current={active === 'contact' ? 'page' : undefined}>Contact</a>
             </div>
           </div>
         )}

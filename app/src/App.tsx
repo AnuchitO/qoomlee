@@ -13,15 +13,20 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 pb-20 md:pb-0">
+    <div id="home" className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 pb-20 md:pb-0">
       <Header />
       <Motto />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         <div className="grid lg:grid-cols-3 gap-6 sm:gap-8">
           <div className="lg:col-span-2">
-            <CheckinForm onSubmit={handleCheckinSubmit} />
-            <InfoCards />
+            <div id="manage" />
+            <div id="checkin">
+              <CheckinForm onSubmit={handleCheckinSubmit} />
+            </div>
+            <div id="flights">
+              <InfoCards />
+            </div>
           </div>
 
           <div className="lg:col-span-1">
@@ -30,7 +35,9 @@ function App() {
         </div>
       </div>
 
-      <Footer />
+      <div id="contact">
+        <Footer />
+      </div>
       <MobileBottomNav />
     </div>
   );

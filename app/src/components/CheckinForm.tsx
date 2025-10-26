@@ -32,7 +32,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 border border-sky-100 hover:shadow-xl transition-shadow duration-300">
+    <div id="checkin" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 border border-sky-100 hover:shadow-xl transition-shadow duration-300">
       <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6">Check-in</h3>
 
       <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
