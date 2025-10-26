@@ -23,7 +23,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
     }
     try {
       setSubmitting(true);
-      await onSubmit({ lastName: lastName.trim(), bookingRef: bookingRef.trim().toUpperCase() });
+      await onSubmit({ lastName: lastName.trim().toUpperCase(), bookingRef: bookingRef.trim().toUpperCase() });
     } catch (err) {
       setError('We couldn’t find your booking. Check your details and try again.');
     } finally {
