@@ -1,4 +1,4 @@
-export default function Hero() {
+export default function Motto() {
   return (
     <div className="bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-500 text-white py-8 sm:py-12 md:py-16 px-4">
       <div className="max-w-7xl mx-auto text-center">
