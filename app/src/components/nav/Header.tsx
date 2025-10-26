@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Plane, Menu, X } from 'lucide-react';
-import { navItems, type NavKey } from './nav';
+import { type NavKey } from './nav';
+import DesktopNav from './DesktopNav';
+import MobileMenu from './MobileMenu';
 
 type HeaderProps = {
   onLogoClick?: () => void;
@@ -13,14 +15,6 @@ export default function Header({ onLogoClick }: HeaderProps) {
     setActive(name);
     setIsMenuOpen(false);
   };
-  const desktopClass = (name: NavKey) =>
-    name === active
-      ? 'text-sky-600 font-semibold border-b-2 border-sky-600 pb-1'
-      : 'text-slate-700 hover:text-sky-600 transition-colors font-medium';
-  const mobileClass = (name: NavKey) =>
-    name === active
-      ? 'px-2 py-2 rounded font-semibold text-sky-700 bg-sky-50'
-      : 'px-2 py-2 rounded hover:bg-slate-50';
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-sky-100">
@@ -41,19 +35,7 @@ export default function Header({ onLogoClick }: HeaderProps) {
             </div>
           </button>
 
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <a
-                key={item.key}
-                href={item.href}
-                onClick={() => handleNav(item.key)}
-                className={desktopClass(item.key)}
-                aria-current={active === item.key ? 'page' : undefined}
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
+          <DesktopNav active={active} onNav={handleNav} />
 
           <div className="md:hidden">
             <button
@@ -68,21 +50,7 @@ export default function Header({ onLogoClick }: HeaderProps) {
         </div>
 
         {isMenuOpen && (
-          <div role="menu" className="md:hidden py-3 border-t border-slate-200">
-            <div className="flex flex-col space-y-2">
-              {navItems.map((item) => (
-                <a
-                  key={item.key}
-                  href={item.href}
-                  onClick={() => handleNav(item.key)}
-                  className={mobileClass(item.key)}
-                  aria-current={active === item.key ? 'page' : undefined}
-                >
-                  {item.label}
-                </a>
-              ))}
-            </div>
-          </div>
+          <MobileMenu active={active} onNav={handleNav} />
         )}
       </nav>
     </header>

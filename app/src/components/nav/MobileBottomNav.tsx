@@ -26,7 +26,7 @@ export default function MobileBottomNav() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-sky-600 rounded-b-full" />
               )}
               <Icon className="w-5 h-5" />
-              <span className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+              <span className={`text-xs text-center ${isActive ? 'font-semibold' : 'font-medium'}`}>{label}</span>
             </a>
           );
         })}
