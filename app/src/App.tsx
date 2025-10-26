@@ -1,10 +1,10 @@
-import Header from './components/Header';
+import Header from './components/nav/Header';
 import Motto from './components/Motto';
 import CheckinForm, { CheckinPayload } from './components/CheckinForm';
 import InfoCards from './components/InfoCards';
 import TravelTipsSidebar from './components/TravelTipsSidebar';
 import Footer from './components/Footer';
-import MobileBottomNav from './components/MobileBottomNav';
+import MobileBottomNav from './components/nav/MobileBottomNav';
 
 function App() {
   function handleCheckinSubmit(payload: CheckinPayload) {

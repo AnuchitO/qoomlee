@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { Plane, Menu, X } from 'lucide-react';
+import { navItems, type NavKey } from './nav';
 
 type HeaderProps = {
   onLogoClick?: () => void;
 };
-
-type NavKey = 'home' | 'flights' | 'manage' | 'checkin' | 'contact';
 
 export default function Header({ onLogoClick }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -43,11 +42,17 @@ export default function Header({ onLogoClick }: HeaderProps) {
           </button>
 
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" onClick={() => handleNav('home')} className={desktopClass('home')} aria-current={active === 'home' ? 'page' : undefined}>Home</a>
-            <a href="#flights" onClick={() => handleNav('flights')} className={desktopClass('flights')} aria-current={active === 'flights' ? 'page' : undefined}>Flights</a>
-            <a href="#manage" onClick={() => handleNav('manage')} className={desktopClass('manage')} aria-current={active === 'manage' ? 'page' : undefined}>Manage Booking</a>
-            <a href="#checkin" onClick={() => handleNav('checkin')} className={desktopClass('checkin')} aria-current={active === 'checkin' ? 'page' : undefined}>Check-in</a>
-            <a href="#contact" onClick={() => handleNav('contact')} className={desktopClass('contact')} aria-current={active === 'contact' ? 'page' : undefined}>Contact</a>
+            {navItems.map((item) => (
+              <a
+                key={item.key}
+                href={item.href}
+                onClick={() => handleNav(item.key)}
+                className={desktopClass(item.key)}
+                aria-current={active === item.key ? 'page' : undefined}
+              >
+                {item.label}
+              </a>
+            ))}
           </div>
 
           <div className="md:hidden">
@@ -65,11 +70,17 @@ export default function Header({ onLogoClick }: HeaderProps) {
         {isMenuOpen && (
           <div role="menu" className="md:hidden py-3 border-t border-slate-200">
             <div className="flex flex-col space-y-2">
-              <a href="#home" onClick={() => handleNav('home')} className={mobileClass('home')} aria-current={active === 'home' ? 'page' : undefined}>Home</a>
-              <a href="#flights" onClick={() => handleNav('flights')} className={mobileClass('flights')} aria-current={active === 'flights' ? 'page' : undefined}>Flights</a>
-              <a href="#manage" onClick={() => handleNav('manage')} className={mobileClass('manage')} aria-current={active === 'manage' ? 'page' : undefined}>Manage Booking</a>
-              <a href="#checkin" onClick={() => handleNav('checkin')} className={mobileClass('checkin')} aria-current={active === 'checkin' ? 'page' : undefined}>Check-in</a>
-              <a href="#contact" onClick={() => handleNav('contact')} className={mobileClass('contact')} aria-current={active === 'contact' ? 'page' : undefined}>Contact</a>
+              {navItems.map((item) => (
+                <a
+                  key={item.key}
+                  href={item.href}
+                  onClick={() => handleNav(item.key)}
+                  className={mobileClass(item.key)}
+                  aria-current={active === item.key ? 'page' : undefined}
+                >
+                  {item.label}
+                </a>
+              ))}
             </div>
           </div>
         )}

@@ -1,28 +1,18 @@
 import { useState } from 'react';
-import { Home, Plane, CheckCircle, Luggage, Send } from 'lucide-react';
-
-type TabKey = 'home' | 'flights' | 'checkin' | 'booking' | 'contact';
+import { navItems, type NavKey } from './nav';
 
 export default function MobileBottomNav() {
-  const [active, setActive] = useState<TabKey>('checkin');
-
-  const tabs: { key: TabKey; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
-    { key: 'home', label: 'Home', Icon: Home },
-    { key: 'flights', label: 'Flights', Icon: Plane },
-    { key: 'checkin', label: 'Check-in', Icon: CheckCircle },
-    { key: 'booking', label: 'Booking', Icon: Luggage },
-    { key: 'contact', label: 'Contact', Icon: Send },
-  ];
+  const [active, setActive] = useState<NavKey>('checkin');
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-50 safe-area-inset-bottom">
       <div className="grid grid-cols-5 h-16">
-        {tabs.map(({ key, label, Icon }) => {
+        {navItems.map(({ key, label, href, mobile: { Icon } }) => {
           const isActive = active === key;
           return (
-            <button
+            <a
               key={key}
-              type="button"
+              href={href}
               aria-current={isActive ? 'page' : undefined}
               onClick={() => setActive(key)}
               className={
@@ -37,7 +27,7 @@ export default function MobileBottomNav() {
               )}
               <Icon className="w-5 h-5" />
               <span className={`text-xs ${isActive ? 'font-semibold' : 'font-medium'}`}>{label}</span>
-            </button>
+            </a>
           );
         })}
       </div>

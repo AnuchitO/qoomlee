@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import Header from './Header';
+import Header from './nav/Header';
 
 it('toggles mobile menu', () => {
   render(<Header />);
