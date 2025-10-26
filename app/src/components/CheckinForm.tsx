@@ -18,14 +18,14 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
     e.preventDefault();
     setError(null);
     if (!canSubmit) {
-      setError('Please enter your last name and a valid booking reference.');
+      setError('Enter your last name and booking reference.');
       return;
     }
     try {
       setSubmitting(true);
       await onSubmit({ lastName: lastName.trim(), bookingRef: bookingRef.trim().toUpperCase() });
     } catch (err) {
-      setError('Unable to find booking. Please verify your details and try again.');
+      setError('We couldn’t find your booking. Check your details and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -46,7 +46,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             className="w-full px-4 py-3.5 sm:py-3 text-base rounded-lg border-2 border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none transition-all touch-manipulation"
-            placeholder="Enter your last name"
+            placeholder="Your last name"
             autoComplete="family-name"
             required
           />
@@ -54,7 +54,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
 
         <div>
           <label htmlFor="bookingRef" className="block text-sm font-semibold text-slate-700 mb-2">
-            Booking Reference or PNR
+            Booking reference (PNR)
           </label>
           <input
             type="text"
@@ -62,7 +62,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
             value={bookingRef}
             onChange={(e) => setBookingRef(e.target.value.toUpperCase())}
             className="w-full px-4 py-3.5 sm:py-3 text-base rounded-lg border-2 border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none transition-all uppercase touch-manipulation"
-            placeholder="e.g., ABC123 or 1234567890123"
+            placeholder="ABC123 or 1234567890123"
             autoComplete="off"
             required
           />
@@ -85,7 +85,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
 
       <div className="mt-5 sm:mt-6 p-3.5 sm:p-4 bg-sky-50 rounded-lg border border-sky-100">
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-          <span className="font-semibold text-sky-700">Tip:</span> Online check-in opens 24 hours before departure and closes 2 hours before your flight.
+          <span className="font-semibold text-sky-700">Tip:</span> Online check-in opens 24 hours before departure and closes 2 hours before departure.
         </p>
       </div>
     </div>
