@@ -5,7 +5,7 @@ type DesktopNavProps = {
   onNav: (key: NavKey) => void;
 };
 
-export default function DesktopNav({ active, onNav }: DesktopNavProps) {
+export function DesktopNav({ active, onNav }: DesktopNavProps) {
   const desktopClass = (name: NavKey) =>
     name === active
       ? 'text-sky-600 font-semibold border-b-2 border-sky-600 pb-1'
