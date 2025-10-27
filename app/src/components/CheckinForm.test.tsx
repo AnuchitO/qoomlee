@@ -7,7 +7,7 @@ it('submits with uppercase booking ref and validates fields', async () => {
 
   const lastName = screen.getByLabelText(/last name/i);
   const bookingRef = screen.getByLabelText(/booking reference/i);
-  const button = screen.getByRole('button', { name: /find my booking/i });
+  const button = screen.getByRole('button', { name: /retrieve booking/i });
 
   // Initially disabled
   expect(button).toBeDisabled();
