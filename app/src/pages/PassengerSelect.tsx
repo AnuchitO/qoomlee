@@ -30,48 +30,65 @@ export default function PassengerSelect({ passengers, onNext, onBack }: Passenge
           <p className="text-sm text-slate-600 mt-1.5">Choose passengers for check-in</p>
         </div>
         
-        {/* Passenger list */}
-        <div className="divide-y divide-slate-100">
-          {passengers.map((p, idx) => (
-            <label 
-              key={`${p.firstName}-${p.lastName}-${idx}`} 
-              className="flex items-center gap-4 px-5 py-4 cursor-pointer touch-manipulation active:bg-sky-50/50 hover:bg-slate-50/50 transition-colors group"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-slate-900 text-base leading-tight group-hover:text-sky-700 transition-colors">
-                  {p.firstName} {p.lastName}
+        {/* Passenger list - Toggle cards */}
+        <div className="p-4 space-y-3">
+          {passengers.map((p, idx) => {
+            const isSelected = !!selected[idx];
+            return (
+              <button
+                key={`${p.firstName}-${p.lastName}-${idx}`}
+                type="button"
+                onClick={() => setSelected((s) => ({ ...s, [idx]: !s[idx] }))}
+                className={`relative w-full text-left px-4 py-4 rounded-xl border-2 transition-all touch-manipulation overflow-hidden ${
+                  isSelected
+                    ? 'border-sky-500 bg-sky-50/50 shadow-sm'
+                    : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm active:scale-[0.99]'
+                }`}
+              >
+                {/* Corner checkmark badge with animation */}
+                <div className={`absolute top-0 right-0 transition-all duration-300 ${
+                  isSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
+                }`}>
+                  <div className="relative w-11 h-11">
+                    {/* Triangle background */}
+                    <svg className="w-11 h-11 text-sky-600" viewBox="0 0 44 44" fill="currentColor">
+                      <path d="M44 0 L44 44 L0 0 Z" />
+                    </svg>
+                    {/* Checkmark icon - centered in triangle */}
+                    <svg 
+                      className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-white" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor" 
+                      strokeWidth={3.5}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-600">
-                    {p.paxType}
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    {p.seat ? `Seat ${p.seat}` : 'No seat assigned'}
-                  </span>
+
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0 pr-6">
+                    <div className={`font-semibold text-base leading-tight transition-colors ${
+                      isSelected ? 'text-sky-900' : 'text-slate-900'
+                    }`}>
+                      {p.firstName} {p.lastName}
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${
+                        isSelected ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {p.paxType}
+                      </span>
+                      <span className={`text-xs ${isSelected ? 'text-sky-700' : 'text-slate-500'}`}>
+                        {p.seat ? `Seat ${p.seat}` : 'No seat assigned'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex-shrink-0 flex items-center">
-                <div className="relative inline-flex">
-                  <input
-                    type="checkbox"
-                    className="peer h-7 w-7 cursor-pointer appearance-none rounded-lg border-2 border-slate-300 bg-white transition-all checked:border-sky-600 checked:bg-sky-600 hover:border-sky-400 focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-                    checked={!!selected[idx]}
-                    onChange={(e) => setSelected((s) => ({ ...s, [idx]: e.target.checked }))}
-                  />
-                  <svg
-                    className="pointer-events-none absolute inset-0 m-auto w-4 h-4 text-white opacity-0 transition-opacity peer-checked:opacity-100"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3.5}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              </div>
-            </label>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
       
