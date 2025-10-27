@@ -10,7 +10,7 @@ import { useModal } from '../components/ModalProvider';
 import { findBooking, ApiError } from '../services/checkin';
 import type { CheckinPayload } from '../components/CheckinForm';
 
-export default function CheckinFlow() {
+export const CheckinFlow = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
   const { booking, setBooking, selectedPassengers, setSelectedPassengers, reset } = useCheckin();

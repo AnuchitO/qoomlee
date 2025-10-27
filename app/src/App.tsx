@@ -6,7 +6,7 @@ import TravelTipsSidebar from './components/TravelTipsSidebar';
 import Footer from './components/Footer';
 import MobileBottomNav from './components/nav/MobileBottomNav';
 import { useModal } from './components/ModalProvider';
-import CheckinFlow from './pages/CheckinFlow';
+import { CheckinFlow } from './pages/CheckinFlow';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCheckin } from './context/CheckinContext';
 import { findBooking, ApiError } from './services/checkin';
