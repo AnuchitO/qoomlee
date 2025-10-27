@@ -12,12 +12,12 @@ it('submits with uppercase booking ref and validates fields', async () => {
   // Initially disabled
   expect(button).toBeDisabled();
 
-  fireEvent.change(lastName, { target: { value: 'Doe' } });
+  fireEvent.change(lastName, { target: { value: 'Huum' } });
   fireEvent.change(bookingRef, { target: { value: 'abc123' } });
 
   expect(button).not.toBeDisabled();
 
   fireEvent.click(button);
 
-  expect(onSubmit).toHaveBeenCalledWith({ lastName: 'Doe', bookingRef: 'ABC123' });
+  expect(onSubmit).toHaveBeenCalledWith({ lastName: 'HUUM', bookingRef: 'ABC123' });
 });

@@ -33,7 +33,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
 
   return (
     <div id="checkin" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 border border-sky-100 hover:shadow-xl transition-shadow duration-300">
-      <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6">Check-in</h3>
+      <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6">Retrieve Your Booking</h3>
 
       <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         <div>
@@ -73,7 +73,7 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
           disabled={!canSubmit || submitting}
           className="w-full bg-gradient-to-r from-sky-600 to-cyan-600 text-white font-semibold py-4 sm:py-4 text-base sm:text-lg rounded-lg hover:from-sky-700 hover:to-cyan-700 active:scale-[0.98] transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {submitting ? 'Finding…' : 'Find My Booking'}
+          {submitting ? 'Retrieving…' : 'Retrieve Booking'}
         </button>
       </form>
 
