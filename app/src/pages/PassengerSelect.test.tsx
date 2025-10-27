@@ -2,11 +2,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import PassengerSelect from './PassengerSelect';
 import type { Passenger } from '../types/checkin';
+import { PaxType } from '../types/checkin';
 
 const mockPassengers: Passenger[] = [
-    { firstName: 'Alex', lastName: 'Huum', paxType: 'ADT', seat: '12A', checkedIn: false },
-    { firstName: 'John', lastName: 'Smith', paxType: 'INF', seat: '12B', checkedIn: false },
-    { firstName: 'Sarah', lastName: 'Lee', paxType: 'CHD', seat: '12C', checkedIn: false },
+    { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+    { firstName: 'John', lastName: 'Smith', paxType: PaxType.INF, seat: '12B', checkedIn: false },
+    { firstName: 'Sarah', lastName: 'Lee', paxType: PaxType.CHD, seat: '12C', checkedIn: false },
 ];
 
 describe('PassengerSelect', () => {
@@ -29,9 +30,9 @@ describe('PassengerSelect', () => {
             const onBack = vi.fn();
             render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
-            expect(screen.getByText('ADT')).toBeInTheDocument();
-            expect(screen.getByText('CHD')).toBeInTheDocument();
-            expect(screen.getByText('INF')).toBeInTheDocument();
+            expect(screen.getByText(PaxType.ADT)).toBeInTheDocument();
+            expect(screen.getByText(PaxType.CHD)).toBeInTheDocument();
+            expect(screen.getByText(PaxType.INF)).toBeInTheDocument();
             expect(screen.getByText('Seat 12A')).toBeInTheDocument();
             expect(screen.getByText('Seat 12B')).toBeInTheDocument();
             expect(screen.getByText('Seat 12C')).toBeInTheDocument();
@@ -247,7 +248,7 @@ describe('PassengerSelect', () => {
             const onNext = vi.fn();
             const onBack = vi.fn();
             const passengersWithoutSeats: Passenger[] = [
-                { firstName: 'Alex', lastName: 'Huum', paxType: 'ADT', seat: null, checkedIn: false },
+                { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: null, checkedIn: false },
             ];
 
             render(<PassengerSelect passengers={passengersWithoutSeats} onNext={onNext} onBack={onBack} />);

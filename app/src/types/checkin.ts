@@ -7,10 +7,16 @@ export type JourneySegment = {
   operatingCarrier: string;
 };
 
+export enum PaxType {
+  ADT = 'ADT',
+  CHD = 'CHD',
+  INF = 'INF',
+}
+
 export type Passenger = {
   firstName: string;
   lastName: string;
-  paxType: 'ADT' | 'CHD' | 'INF';
+  paxType: PaxType;
   seat?: string | null;
   checkedIn: boolean;
 };

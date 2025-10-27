@@ -10,7 +10,6 @@ import { CheckinFlow } from './pages/CheckinFlow';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCheckin } from './context/CheckinContext';
 import { findBooking, ApiError } from './services/checkin';
-import ShowCounter from './ShowCount.tsx';
 
 function App() {
   const { openModal } = useModal();
