@@ -10,19 +10,20 @@ type ModalProps = {
   message?: string;
   children?: React.ReactNode;
   footer?: React.ReactNode;
+  closeLabel?: string;
 };
 
-export default function Modal({ open, onClose, title, intent = 'info', message, children, footer }: ModalProps) {
+export default function Modal({ open, onClose, title, intent = 'info', message, children, footer, closeLabel }: ModalProps) {
   if (!open) return null;
 
   const badgeClass =
     intent === 'success'
       ? 'bg-green-100 text-green-700'
       : intent === 'error'
-      ? 'bg-red-100 text-red-700'
-      : intent === 'warning'
-      ? 'bg-yellow-100 text-yellow-800'
-      : 'bg-sky-100 text-sky-700';
+        ? 'bg-red-100 text-red-700'
+        : intent === 'warning'
+          ? 'bg-yellow-100 text-yellow-800'
+          : 'bg-sky-100 text-sky-700';
 
   const icon = intent === 'success' ? '✓' : intent === 'error' ? '!' : intent === 'warning' ? '!' : 'i';
 
@@ -47,7 +48,7 @@ export default function Modal({ open, onClose, title, intent = 'info', message, 
             className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 active:scale-[0.99]"
             onClick={onClose}
           >
-            Close
+            {closeLabel || 'Close'}
           </button>
         </div>
       </div>

@@ -10,6 +10,7 @@ type ModalState = {
   message?: string;
   content?: React.ReactNode;
   footer?: React.ReactNode;
+  closeLabel?: string;
 };
 
 const defaultState: ModalState = {
@@ -27,6 +28,7 @@ export type OpenModalOptions = {
   message?: string;
   content?: React.ReactNode;
   footer?: React.ReactNode;
+  closeLabel?: string;
 };
 
 type ModalContextValue = {
@@ -47,6 +49,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
       message: opts.message,
       content: opts.content,
       footer: opts.footer,
+      closeLabel: opts.closeLabel,
     });
   }, []);
 
@@ -64,6 +67,7 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
         intent={state.intent}
         message={state.message}
         footer={state.footer}
+        closeLabel={state.closeLabel}
       >
         {state.content}
       </Modal>
