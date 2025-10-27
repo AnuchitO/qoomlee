@@ -1,7 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import CheckinForm from './CheckinForm';
 
 it('submits with uppercase booking ref and validates fields', async () => {
+  const user = userEvent.setup();
   const onSubmit = vi.fn();
   render(<CheckinForm onSubmit={onSubmit} />);
 
@@ -12,12 +14,16 @@ it('submits with uppercase booking ref and validates fields', async () => {
   // Initially disabled
   expect(button).toBeDisabled();
 
-  fireEvent.change(lastName, { target: { value: 'Huum' } });
-  fireEvent.change(bookingRef, { target: { value: 'abc123' } });
+  await user.type(lastName, 'Huum');
+  await user.type(bookingRef, 'abc123');
 
-  expect(button).not.toBeDisabled();
+  await waitFor(() => {
+    expect(button).not.toBeDisabled();
+  });
 
-  fireEvent.click(button);
+  await user.click(button);
 
-  expect(onSubmit).toHaveBeenCalledWith({ lastName: 'HUUM', bookingRef: 'ABC123' });
+  await waitFor(() => {
+    expect(onSubmit).toHaveBeenCalledWith({ lastName: 'HUUM', bookingRef: 'ABC123' });
+  });
 });
