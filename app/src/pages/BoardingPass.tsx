@@ -1,4 +1,5 @@
-//
+import { useNavigate } from 'react-router-dom';
+import { useCheckin } from '../context/CheckinContext';
 import type { FindBookingResponse, Passenger } from '../types/checkin';
 
 type BoardingPassProps = {
@@ -7,12 +8,24 @@ type BoardingPassProps = {
 };
 
 export default function BoardingPass({ booking, passengers }: BoardingPassProps) {
+  const navigate = useNavigate();
+  const { reset } = useCheckin();
   const flight = booking.journeys[0];
   const boardingTime = new Date(new Date(flight.departure.time).getTime() - 40 * 60000).toLocaleString();
 
+  const handleFinish = () => {
+    reset();
+    navigate('/');
+  };
+
   return (
-    <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 border border-sky-100">
-      <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-5">Boarding Pass</h3>
+    <>
+      <div className="bg-white rounded-2xl shadow-lg border border-slate-200/80 overflow-hidden mb-4">
+        <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-slate-50/50 to-white border-b border-slate-100">
+          <h3 className="text-xl font-bold text-slate-900 tracking-tight">Boarding Pass</h3>
+          <p className="text-sm text-slate-600 mt-1.5">Your check-in is complete</p>
+        </div>
+        <div className="p-5 sm:p-6">
       <div className="space-y-4">
         {passengers.map((p, idx) => (
           <div key={`${p.firstName}-${p.lastName}-${idx}`} className="border border-slate-200 rounded-lg p-4">
@@ -53,7 +66,22 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
           </div>
         ))}
       </div>
-    </div>
+      </div>
+      </div>
+
+      {/* Sticky Finish button */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-lg z-30 safe-area-inset-bottom">
+        <div className="max-w-3xl mx-auto px-4 py-3">
+          <button
+            type="button"
+            onClick={handleFinish}
+            className="w-full inline-flex items-center justify-center rounded-lg bg-sky-600 text-white px-4 py-3.5 text-base font-semibold hover:bg-sky-700 active:scale-[0.98] touch-manipulation"
+          >
+            Finish
+          </button>
+        </div>
+      </div>
+    </>
   );
 }
 
