@@ -53,7 +53,7 @@ export const CheckinFlow = () => {
           </button>
         </div>
       </div>
-      
+
       {/* Scrollable content with bottom padding for sticky actions */}
       <div className="flex-1 overflow-y-auto pb-24 sm:pb-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
@@ -117,7 +117,7 @@ export const CheckinFlow = () => {
           </Routes>
         </div>
       </div>
-      
+
       <MobileBottomNav />
     </div>
   );
