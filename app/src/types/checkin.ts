@@ -32,4 +32,5 @@ export type FindBookingResponse = {
 export type PassengerExtraDetails = {
   nationality: string;
   phone: string;
+  countryCode: string;
 };
