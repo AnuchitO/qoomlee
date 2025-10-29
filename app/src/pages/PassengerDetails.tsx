@@ -61,11 +61,36 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
       passengers.map((p) => [keyFor(p), { nationality: '', phone: '', countryCode: '+66' }])
     )
   );
+  const [touched, setTouched] = useState<Record<string, { nationality: boolean; phone: boolean }>>({});
+
+  const validateNationality = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return 'Nationality is required';
+    if (trimmed.length < 2) return 'Enter valid country code (e.g., TH, US)';
+    if (!/^[A-Z]{2,3}$/.test(trimmed)) return 'Use 2-3 letter country code';
+    return null;
+  };
+
+  const validatePhone = (value: string): string | null => {
+    const trimmed = value.trim();
+    if (trimmed.length === 0) return 'Phone number is required';
+    if (trimmed.length < 6) return 'Phone number too short';
+    if (trimmed.length > 15) return 'Phone number too long';
+    if (!/^[0-9\s\-()]+$/.test(trimmed)) return 'Only numbers, spaces, and dashes allowed';
+    return null;
+  };
+
+  const getFieldError = (passengerKey: string, field: 'nationality' | 'phone'): string | null => {
+    if (!touched[passengerKey]?.[field]) return null;
+    const d = details[passengerKey];
+    if (!d) return null;
+    return field === 'nationality' ? validateNationality(d.nationality) : validatePhone(d.phone);
+  };
 
   const allValid = passengers.every((p) => {
     const k = keyFor(p);
     const d = details[k];
-    return d && d.nationality.trim().length > 1 && d.phone.trim().length >= 6;
+    return d && validateNationality(d.nationality) === null && validatePhone(d.phone) === null;
   });
 
   return (
@@ -92,37 +117,67 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
                       type="text"
                       value={d.nationality}
                       onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], nationality: e.target.value.toUpperCase() } }))}
+                      onBlur={() => setTouched((s) => ({ ...s, [k]: { ...s[k], nationality: true } }))}
                       placeholder="TH / US / SG"
-                      className="w-full px-4 py-3.5 text-base rounded-lg border-2 border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none touch-manipulation"
+                      maxLength={3}
+                      className={`w-full px-4 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation ${
+                        getFieldError(k, 'nationality')
+                          ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                          : 'border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200'
+                      }`}
                       autoFocus={idx === 0}
+                      aria-invalid={!!getFieldError(k, 'nationality')}
+                      aria-describedby={getFieldError(k, 'nationality') ? `${k}-nationality-error` : undefined}
                     />
+                    {getFieldError(k, 'nationality') && (
+                      <p id={`${k}-nationality-error`} className="text-xs text-red-600 mt-1.5 ml-1.5">
+                        {getFieldError(k, 'nationality')}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
                     <div className="flex gap-2">
-                      <select
-                        value={d.countryCode}
-                        onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], countryCode: e.target.value } }))}
-                        className="w-28 px-3 py-3.5 text-base rounded-lg border-2 border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none touch-manipulation bg-white cursor-pointer"
-                      >
-                        {COUNTRY_CODES.map((cc) => (
-                          <option key={cc.code} value={cc.code}>
-                            {cc.flag} {cc.code}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        type="tel"
-                        value={d.phone}
-                        onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], phone: e.target.value } }))}
-                        placeholder="8x xxx xxxx"
-                        className="flex-1 px-4 py-3.5 text-base rounded-lg border-2 border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200 outline-none touch-manipulation"
-                        autoComplete="tel-national"
-                      />
+                      <div className="flex-shrink-0">
+                        <select
+                          value={d.countryCode}
+                          onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], countryCode: e.target.value } }))}
+                          className={`w-28 px-3 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation bg-white cursor-pointer border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200`}
+                        >
+                          {COUNTRY_CODES.map((cc) => (
+                            <option key={cc.code} value={cc.code}>
+                              {cc.flag} {cc.code}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-slate-500 mt-1.5 ml-1.5">
+                          {COUNTRY_CODES.find((cc) => cc.code === d.countryCode)?.name || ''}
+                        </p>
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="tel"
+                          value={d.phone}
+                          onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], phone: e.target.value } }))}
+                          onBlur={() => setTouched((s) => ({ ...s, [k]: { ...s[k], phone: true } }))}
+                          placeholder="8x xxx xxxx"
+                          maxLength={15}
+                          className={`w-full px-4 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation ${
+                            getFieldError(k, 'phone')
+                              ? 'border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                              : 'border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200'
+                          }`}
+                          autoComplete="tel-national"
+                          aria-invalid={!!getFieldError(k, 'phone')}
+                          aria-describedby={getFieldError(k, 'phone') ? `${k}-phone-error` : undefined}
+                        />
+                        {getFieldError(k, 'phone') && (
+                          <p id={`${k}-phone-error`} className="text-xs text-red-600 mt-1.5 ml-1.5">
+                            {getFieldError(k, 'phone')}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1.5 ml-1.5">
-                      {COUNTRY_CODES.find((cc) => cc.code === d.countryCode)?.name || ''}
-                    </p>
                   </div>
                 </div>
               </div>
