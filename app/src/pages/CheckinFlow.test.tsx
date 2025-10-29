@@ -91,7 +91,7 @@ describe('CheckinFlow', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('Select Passengers')).toBeInTheDocument();
+     expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
     });
   });
 
