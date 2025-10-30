@@ -49,15 +49,60 @@ The last comment block of each slide will be treated as slide notes. It will be 
 layout: center
 ---
 
-<div v-if="!showPassengerSelect" class="flex flex-col items-center justify-center h-full">
+<div class="flex flex-col items-center justify-center h-full">
   <h1 class="mb-2 mt-8">Check-in Form</h1>
   
   <div class="max-w-2xl mx-auto scale-90">
-    <CheckinFormVue :onSubmit="handleCheckinSubmit" />
+    <CheckinFormVue 
+      :onSubmit="handleCheckinSubmit"
+      initialLastName=""
+      initialBookingRef=""
+      :autoSubmit="false"
+    />
   </div>
 </div>
 
-<div v-else class="flex flex-col items-center justify-center h-full">
+<script setup>
+import { ref } from 'vue'
+import { PaxType } from './types/passenger'
+
+// Store data globally using Slidev's context
+if (!window.checkinData) {
+  window.checkinData = {
+    booking: 'ABC123',
+    mockPassengers: [
+      { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+      { firstName: 'John', lastName: 'Smith', paxType: PaxType.CHD, seat: '12B', checkedIn: false },
+    ]
+  }
+}
+
+const handleCheckinSubmit = async (payload) => {
+  console.log('Form submitted:', payload)
+  
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
+  
+  // Validate credentials - check if last name is Huum and booking ref is ABC123
+  if (payload.lastName !== 'HUUM' || payload.bookingRef !== 'ABC123') {
+    // Throw error to show error message in form
+    throw new Error('Booking not found')
+  }
+  
+  // If valid, store booking and navigate
+  window.checkinData.booking = payload
+  const slidev = window.__slidev__
+  if (slidev && slidev.nav) {
+    slidev.nav.next()
+  }
+}
+</script>
+
+---
+layout: center
+---
+
+<div class="flex flex-col items-center justify-center h-full">
   <h1 class="mb-2 mt-8">Select Passengers</h1>
   
   <div class="max-w-2xl mx-auto scale-90">
@@ -71,29 +116,22 @@ layout: center
 
 <script setup>
 import { ref } from 'vue'
-import { PaxType } from './types/passenger'
 
-const showPassengerSelect = ref(false)
-const mockPassengers = ref([
-  { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
-  { firstName: 'John', lastName: 'Smith', paxType: PaxType.CHD, seat: '12B', checkedIn: false },
-])
-
-const handleCheckinSubmit = async (payload) => {
-  console.log('Form submitted:', payload)
-  // Simulate API call
-  await new Promise(resolve => setTimeout(resolve, 500))
-  showPassengerSelect.value = true
-}
+const mockPassengers = ref(window.checkinData?.mockPassengers || [])
 
 const handlePassengerNext = (selected) => {
   console.log('Selected passengers:', selected)
+  window.checkinData.selectedPassengers = selected
   alert(`${selected.length} passenger(s) selected for check-in`)
-  showPassengerSelect.value = false
+  // Could navigate to next slide if you have more steps
+  // $nav.next()
 }
 
 const handlePassengerBack = () => {
-  showPassengerSelect.value = false
+  const slidev = window.__slidev__
+  if (slidev && slidev.nav) {
+    slidev.nav.prev()
+  }
 }
 </script>
 

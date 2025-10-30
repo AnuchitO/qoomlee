@@ -1,23 +1,35 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 export type CheckinPayload = { lastName: string; bookingRef: string }
 
 const props = defineProps<{
   onSubmit?: (payload: CheckinPayload) => void | Promise<void>
+  initialLastName?: string
+  initialBookingRef?: string
+  autoSubmit?: boolean
 }>()
 
-const lastName = ref('')
-const bookingRef = ref('')
+const lastName = ref(props.initialLastName || '')
+const bookingRef = ref(props.initialBookingRef || '')
 const error = ref<string | null>(null)
 const submitting = ref(false)
+
+onMounted(async () => {
+  if (props.autoSubmit && canSubmit.value) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+    await handleSubmit(new Event('submit'))
+  }
+})
 
 const canSubmit = computed(() => 
   lastName.value.trim().length > 1 && bookingRef.value.trim().length >= 6
 )
 
 async function handleSubmit(e: Event) {
-  e.preventDefault()
+  if (e && e.preventDefault) {
+    e.preventDefault()
+  }
   error.value = null
   
   if (!canSubmit.value) {
