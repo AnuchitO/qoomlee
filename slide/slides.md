@@ -44,3 +44,24 @@ Presentation slides for developers
 <!--
 The last comment block of each slide will be treated as slide notes. It will be visible and editable in Presenter Mode along with the slide. [Read more in the docs](https://sli.dev/guide/syntax.html#notes)
 -->
+
+---
+layout: center
+---
+
+<div class="flex flex-col items-center justify-center h-full">
+  <h1 class="mb-2 mt-8">Check-in Form</h1>
+  
+  <div class="max-w-2xl mx-auto scale-90">
+    <CheckinFormVue :onSubmit="handleSubmit" />
+  </div>
+</div>
+
+<script setup>
+const handleSubmit = (payload) => {
+  console.log('Form submitted:', payload)
+  alert(`Booking retrieved for ${payload.lastName} - ${payload.bookingRef}`)
+}
+</script>
+
+---
