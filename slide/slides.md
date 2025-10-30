@@ -49,18 +49,51 @@ The last comment block of each slide will be treated as slide notes. It will be 
 layout: center
 ---
 
-<div class="flex flex-col items-center justify-center h-full">
+<div v-if="!showPassengerSelect" class="flex flex-col items-center justify-center h-full">
   <h1 class="mb-2 mt-8">Check-in Form</h1>
   
   <div class="max-w-2xl mx-auto scale-90">
-    <CheckinFormVue :onSubmit="handleSubmit" />
+    <CheckinFormVue :onSubmit="handleCheckinSubmit" />
+  </div>
+</div>
+
+<div v-else class="flex flex-col items-center justify-center h-full">
+  <h1 class="mb-2 mt-8">Select Passengers</h1>
+  
+  <div class="max-w-2xl mx-auto scale-90">
+    <PassengerSelectVue 
+      :passengers="mockPassengers" 
+      :onNext="handlePassengerNext"
+      :onBack="handlePassengerBack"
+    />
   </div>
 </div>
 
 <script setup>
-const handleSubmit = (payload) => {
+import { ref } from 'vue'
+import { PaxType } from './types/passenger'
+
+const showPassengerSelect = ref(false)
+const mockPassengers = ref([
+  { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+  { firstName: 'John', lastName: 'Smith', paxType: PaxType.CHD, seat: '12B', checkedIn: false },
+])
+
+const handleCheckinSubmit = async (payload) => {
   console.log('Form submitted:', payload)
-  alert(`Booking retrieved for ${payload.lastName} - ${payload.bookingRef}`)
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 500))
+  showPassengerSelect.value = true
+}
+
+const handlePassengerNext = (selected) => {
+  console.log('Selected passengers:', selected)
+  alert(`${selected.length} passenger(s) selected for check-in`)
+  showPassengerSelect.value = false
+}
+
+const handlePassengerBack = () => {
+  showPassengerSelect.value = false
 }
 </script>
 
