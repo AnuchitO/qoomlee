@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -5,7 +6,7 @@ import { CheckinFlow } from './CheckinFlow';
 import { CheckinProvider } from '../context/CheckinContext';
 import { ModalProvider } from '../components/ModalProvider';
 import { findBooking } from '../services/checkin';
-import { vi } from 'vitest';
+import { PaxType } from '../types/checkin';
 
 // Mock the services
 vi.mock('../services/checkin', () => ({
@@ -35,19 +36,6 @@ describe('CheckinFlow', () => {
     vi.clearAllMocks();
   });
 
-//   it('renders check-in header with cancel button', () => {
-//     renderWithProviders();
-    
-//     expect(screen.getByText('Check-in')).toBeInTheDocument();
-//     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
-//   });
-
-//   it('renders checkin form on start route', () => {
-//     renderWithProviders('/checkin/start');
-    
-//     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
-//     expect(screen.getByLabelText(/booking reference/i)).toBeInTheDocument();
-//   });
 
   it('submits booking and navigates to passenger select', async () => {
     const user = userEvent.setup();
@@ -56,8 +44,8 @@ describe('CheckinFlow', () => {
       isEligible: true,
       bookingRef: 'ABC123',
       passengers: [
-        { firstName: 'Alex', lastName: 'Huum', paxType: 'ADT' as const, seat: '12A', checkedIn: false },
-        { firstName: 'John', lastName: 'Smith', paxType: 'ADT' as const, seat: '12B', checkedIn: false },
+        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+        { firstName: 'John', lastName: 'Smith', paxType: PaxType.ADT, seat: '12B', checkedIn: false },
       ],
       journeys: [
         {
@@ -91,57 +79,270 @@ describe('CheckinFlow', () => {
     });
 
     await waitFor(() => {
-     expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
     });
   });
 
-//   it('shows error modal when booking not found', async () => {
-//     const user = userEvent.setup();
-//     const errorMessage = 'Booking not found';
-    
-//     vi.mocked(findBooking).mockRejectedValueOnce(new Error(errorMessage));
+  it('renders check-in header with cancel button', () => {
+    renderWithProviders('/checkin/start');
 
-//     renderWithProviders('/checkin/start');
+    expect(screen.getByText('Check-in')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cancel check-in/i })).toBeInTheDocument();
+  });
 
-//     const lastNameInput = screen.getByLabelText(/last name/i);
-//     const bookingRefInput = screen.getByLabelText(/booking reference/i);
-//     const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+  it('displays current step information in header', () => {
+    renderWithProviders('/checkin/start');
 
-//     await user.type(lastNameInput, 'Invalid');
-//     await user.type(bookingRefInput, 'INVALID');
-//     await user.click(submitButton);
+    expect(screen.getByText('Find Booking')).toBeInTheDocument();
+    expect(screen.getByText(/step 1 of 5/i)).toBeInTheDocument();
+  });
 
-//     await waitFor(() => {
-//       expect(screen.getByText('Check-in Error')).toBeInTheDocument();
-//       expect(screen.getByText(errorMessage)).toBeInTheDocument();
-//     });
-//   });
+  it('renders checkin form on start route', () => {
+    renderWithProviders('/checkin/start');
 
-//   it('navigates back to home when cancel is clicked', async () => {
-//     const user = userEvent.setup();
-//     renderWithProviders('/checkin/start');
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/booking reference/i)).toBeInTheDocument();
+  });
 
-//     const cancelButton = screen.getByRole('button', { name: /cancel/i });
-//     await user.click(cancelButton);
+  it('shows error modal when booking not found', async () => {
+    const user = userEvent.setup();
+    const errorMessage = 'Booking not found';
 
-//     // Should navigate back to home - check that checkin form is no longer visible
-//     await waitFor(() => {
-//       expect(screen.queryByLabelText(/last name/i)).not.toBeInTheDocument();
-//     });
-//   });
+    vi.mocked(findBooking).mockRejectedValueOnce(new Error(errorMessage));
 
-//   it('redirects to start if accessing select without booking', () => {
-//     renderWithProviders('/checkin/select');
-    
-//     // Should redirect back to start
-//     expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
-//   });
+    renderWithProviders('/checkin/start');
 
-//   it('renders mobile bottom navigation', () => {
-//     renderWithProviders();
-    
-//     // MobileBottomNav should be rendered
-//     expect(screen.getByText(/home/i)).toBeInTheDocument();
-//     expect(screen.getByText(/flights/i)).toBeInTheDocument();
-//   });
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const bookingRefInput = screen.getByLabelText(/booking reference/i);
+    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+
+    await user.type(lastNameInput, 'Invalid');
+    await user.type(bookingRefInput, 'INVALID');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Check-in Error')).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+  });
+
+  it('shows error modal with ApiError message', async () => {
+    const user = userEvent.setup();
+    const errorMessage = 'Invalid booking reference format';
+
+    const apiError = new Error(errorMessage);
+    apiError.name = 'ApiError';
+    vi.mocked(findBooking).mockRejectedValueOnce(apiError);
+
+    renderWithProviders('/checkin/start');
+
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const bookingRefInput = screen.getByLabelText(/booking reference/i);
+    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+
+    await user.type(lastNameInput, 'Test');
+    await user.type(bookingRefInput, 'INVALID');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Check-in Error')).toBeInTheDocument();
+      expect(screen.getByText(errorMessage)).toBeInTheDocument();
+    });
+  });
+
+  it('opens cancel confirmation modal when cancel button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithProviders('/checkin/start');
+
+    const cancelButton = screen.getByRole('button', { name: /cancel check-in/i });
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancel Check-in?')).toBeInTheDocument();
+      expect(screen.getByText(/your progress will be lost/i)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /yes, cancel/i })).toBeInTheDocument();
+    });
+  });
+
+  it('shows cancel confirmation modal with action buttons', async () => {
+    const user = userEvent.setup();
+    renderWithProviders('/checkin/start');
+
+    const cancelButton = screen.getByRole('button', { name: /cancel check-in/i });
+    await user.click(cancelButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Cancel Check-in?')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /yes, cancel/i })).toBeInTheDocument();
+    });
+  });
+
+  it('redirects to start if accessing select without booking', () => {
+    renderWithProviders('/checkin/select');
+
+    // Should redirect back to start
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+    expect(screen.getByText('Find Booking')).toBeInTheDocument();
+  });
+
+  it('redirects to select if accessing details without selected passengers', () => {
+    // Accessing details without booking or selected passengers should redirect
+    renderWithProviders('/checkin/details');
+
+    // Should redirect to select, which then redirects to start
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+    expect(screen.getByText('Find Booking')).toBeInTheDocument();
+  });
+
+
+  it('displays progress bar with correct percentage', () => {
+    const { container } = renderWithProviders('/checkin/start');
+
+    // Step 1 of 5 = 20%
+    const progressBar = container.querySelector('[style*="width: 20%"]');
+    expect(progressBar).toBeInTheDocument();
+  });
+
+  it('navigates from start to passenger select', async () => {
+    const user = userEvent.setup();
+    const mockBooking = {
+      checkinKey: 'test-key-123',
+      isEligible: true,
+      bookingRef: 'ABC123',
+      passengers: [
+        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+      ],
+      journeys: [
+        {
+          flightNumber: 'QM123',
+          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
+          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          segmentStatus: 'CHECKIN_OPEN' as const,
+          marketingCarrier: 'QM',
+          operatingCarrier: 'QM',
+        },
+      ],
+    };
+
+    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+
+    renderWithProviders('/checkin/start');
+
+    // Step 1: Submit booking
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const bookingRefInput = screen.getByLabelText(/booking reference/i);
+    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+
+    await user.type(lastNameInput, 'Huum');
+    await user.type(bookingRefInput, 'ABC123');
+    await user.click(submitButton);
+
+    // Step 2: Should navigate to select passengers
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
+    });
+
+    // Verify passenger is shown
+    expect(screen.getByText('Alex Huum')).toBeInTheDocument();
+  });
+
+  it('allows navigation back through the flow', async () => {
+    const user = userEvent.setup();
+    const mockBooking = {
+      checkinKey: 'test-key-123',
+      isEligible: true,
+      bookingRef: 'ABC123',
+      passengers: [
+        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+      ],
+      journeys: [
+        {
+          flightNumber: 'QM123',
+          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
+          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          segmentStatus: 'CHECKIN_OPEN' as const,
+          marketingCarrier: 'QM',
+          operatingCarrier: 'QM',
+        },
+      ],
+    };
+
+    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+
+    renderWithProviders('/checkin/start');
+
+    // Navigate to select
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const bookingRefInput = screen.getByLabelText(/booking reference/i);
+    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+
+    await user.type(lastNameInput, 'Huum');
+    await user.type(bookingRefInput, 'ABC123');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
+    });
+
+    // Go back to start
+    const backButton = screen.getByRole('button', { name: /back/i });
+    await user.click(backButton);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+      expect(screen.getByText('Find Booking')).toBeInTheDocument();
+    });
+  });
+
+  it('handles unknown routes by redirecting to start', () => {
+    renderWithProviders('/checkin/unknown-route');
+
+    expect(screen.getByLabelText(/last name/i)).toBeInTheDocument();
+    expect(screen.getByText('Find Booking')).toBeInTheDocument();
+  });
+
+  it('updates step information when navigating', async () => {
+    const user = userEvent.setup();
+    const mockBooking = {
+      checkinKey: 'test-key-123',
+      isEligible: true,
+      bookingRef: 'ABC123',
+      passengers: [
+        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+      ],
+      journeys: [
+        {
+          flightNumber: 'QM123',
+          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
+          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          segmentStatus: 'CHECKIN_OPEN' as const,
+          marketingCarrier: 'QM',
+          operatingCarrier: 'QM',
+        },
+      ],
+    };
+
+    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+
+    renderWithProviders('/checkin/start');
+
+    expect(screen.getByText(/step 1 of 5/i)).toBeInTheDocument();
+    expect(screen.getByText('Find Booking')).toBeInTheDocument();
+
+    // Navigate to select
+    const lastNameInput = screen.getByLabelText(/last name/i);
+    const bookingRefInput = screen.getByLabelText(/booking reference/i);
+    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+
+    await user.type(lastNameInput, 'Huum');
+    await user.type(bookingRefInput, 'ABC123');
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
+    });
+
+    // Verify step updated
+    expect(screen.getByText(/step 2 of 5/i)).toBeInTheDocument();
+  });
 });
