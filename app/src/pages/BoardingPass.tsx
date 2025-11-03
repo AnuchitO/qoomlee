@@ -198,16 +198,26 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
 
               {/* Flight route with airport details */}
               <div className="mb-6 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <div className="flex items-center justify-between">
-                  <div className="text-center flex-1">
-                    <div className="text-xs text-slate-600 mb-1 max-w-[120px] mx-auto">
-                      {getAirportName(flight.departure.airport)}
+                <div className="grid grid-cols-3 items-center">
+                  {/* Departure */}
+                  <div className="text-center">
+                    <div className="h-8 flex items-center justify-center">
+                      <span className="text-xs text-slate-600 line-clamp-2 px-2">
+                        {getAirportName(flight.departure.airport)}
+                      </span>
                     </div>
-                    <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.departure.airport}</div>
-                    <div className="text-xs text-slate-500 mt-1">{formatDate(flight.departure.time, true)}</div>
+                    <div className="h-16 flex items-center justify-center">
+                      <span className="text-4xl font-black text-sky-600 tracking-tight">
+                        {flight.departure.airport}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {formatDate(flight.departure.time, true)}
+                    </div>
                   </div>
                   
-                  <div className="flex-1 px-2">
+                  {/* Flight Info */}
+                  <div className="px-2">
                     <div className="relative">
                       <div className="border-t-2 border-dashed border-slate-300"></div>
                       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 px-2">
@@ -221,12 +231,21 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                     </div>
                   </div>
                   
-                  <div className="text-center flex-1">
-                    <div className="text-xs text-slate-600 mb-1 max-w-[120px] mx-auto">
-                      {getAirportName(flight.arrival.airport)}
+                  {/* Arrival */}
+                  <div className="text-center">
+                    <div className="h-8 flex items-center justify-center">
+                      <span className="text-xs text-slate-600 line-clamp-2 px-2">
+                        {getAirportName(flight.arrival.airport)}
+                      </span>
                     </div>
-                    <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.arrival.airport}</div>
-                    <div className="text-xs text-slate-500 mt-1">{formatDate(flight.departure.time, true)}</div>
+                    <div className="h-16 flex items-center justify-center">
+                      <span className="text-4xl font-black text-sky-600 tracking-tight">
+                        {flight.arrival.airport}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {formatDate(flight.arrival.time, true)}
+                    </div>
                   </div>
                 </div>
               </div>
