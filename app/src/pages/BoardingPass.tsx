@@ -251,22 +251,26 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
               </div>
 
               {/* Flight details grid */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-slate-500 mb-1">Terminal</div>
-                  <div className="text-xl font-bold text-slate-900">{terminal}</div>
+              <div className="grid grid-cols-5 gap-2 mb-4">
+                <div className="bg-slate-50 rounded-lg p-2 text-center">
+                  <div className="text-xs text-slate-500 mb-0.5">Terminal</div>
+                  <div className="text-lg font-bold text-slate-900">{terminal}</div>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-slate-500 mb-1">Gate</div>
-                  <div className="text-xl font-bold text-slate-900">{getGate(idx)}</div>
+                <div className="bg-slate-50 rounded-lg p-2 text-center">
+                  <div className="text-xs text-slate-500 mb-0.5">Gate</div>
+                  <div className="text-lg font-bold text-slate-900">{getGate(idx)}</div>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-slate-500 mb-1">Seat</div>
-                  <div className="text-xl font-bold text-slate-900">{p.seat ?? assignSeat(idx)}</div>
+                <div className="bg-slate-50 rounded-lg p-2 text-center">
+                  <div className="text-xs text-slate-500 mb-0.5">Seat</div>
+                  <div className="text-lg font-bold text-slate-900">{p.seat}</div>
                 </div>
-                <div className="bg-slate-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-slate-500 mb-1">Boarding</div>
-                  <div className="text-2xl font-bold text-sky-600">{boardingTime}</div>
+                <div className="bg-slate-50 rounded-lg p-2 text-center">
+                  <div className="text-xs text-slate-500 mb-0.5">Zone</div>
+                  <div className="text-lg font-bold text-slate-900">{p.boardingZone}</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-2 text-center">
+                  <div className="text-xs text-slate-500 mb-0.5">Boarding</div>
+                  <div className="text-xl font-bold text-sky-600">{boardingTime}</div>
                 </div>
               </div>
 
@@ -371,10 +375,4 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
       </div>
     </>
   );
-}
-
-function assignSeat(i: number) {
-  const row = 12 + i;
-  const letters = ['A', 'C', 'D', 'F'];
-  return `${row}${letters[i % letters.length]}`;
 }
