@@ -119,24 +119,42 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
   const { reset } = useCheckin();
   const flight = booking.journeys[0];
   
-  // Format time as HH:MM
-  const formatTime = (dateString: string) => {
+  // Format time as HH:MM with timezone
+  const formatTime = (dateString: string, includeTz = false) => {
     const date = new Date(dateString);
     const hours = date.getHours().toString().padStart(2, '0');
     const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    if (!includeTz) return `${hours}:${minutes}`;
+    
+    const tz = date.toLocaleTimeString('en', { 
+      timeZoneName: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).split(' ')[2];
+    
+    return (
+      <span className="inline-flex items-baseline">
+        <span className="text-2xl">{hours}:{minutes}</span>
+        <span className="text-sm font-normal text-slate-500 ml-1.5">{tz}</span>
+      </span>
+    );
   };
   
-  // Format date as DD MMM
-  const formatDate = (dateString: string) => {
+  // Format date as DD MMM YYYY
+  const formatDate = (dateString: string, includeYear = false) => {
     const date = new Date(dateString);
     const day = date.getDate();
     const month = date.toLocaleString('en-US', { month: 'short' });
-    return `${day} ${month}`;
+    const year = date.getFullYear();
+    return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
+  };
+  
+  // Format day of week (e.g., Mon, Tue)
+  const formatDay = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en', { weekday: 'short' });
   };
   
   const departureTime = formatTime(flight.departure.time);
-  const departureDate = formatDate(flight.departure.time);
   const boardingTime = formatTime(new Date(new Date(flight.departure.time).getTime() - 40 * 60000).toISOString());
   
   // Mock gate and terminal data
@@ -186,7 +204,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                       {getAirportName(flight.departure.airport)}
                     </div>
                     <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.departure.airport}</div>
-                    <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
+                    <div className="text-xs text-slate-500 mt-1">{formatDate(flight.departure.time, true)}</div>
                   </div>
                   
                   <div className="flex-1 px-2">
@@ -208,7 +226,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                       {getAirportName(flight.arrival.airport)}
                     </div>
                     <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.arrival.airport}</div>
-                    <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
+                    <div className="text-xs text-slate-500 mt-1">{formatDate(flight.departure.time, true)}</div>
                   </div>
                 </div>
               </div>
@@ -217,30 +235,44 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
               <div className="grid grid-cols-4 gap-3 mb-4">
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <div className="text-xs text-slate-500 mb-1">Terminal</div>
-                  <div className="text-2xl font-bold text-slate-900">{terminal}</div>
+                  <div className="text-xl font-bold text-slate-900">{terminal}</div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <div className="text-xs text-slate-500 mb-1">Gate</div>
-                  <div className="text-2xl font-bold text-slate-900">{getGate(idx)}</div>
+                  <div className="text-xl font-bold text-slate-900">{getGate(idx)}</div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <div className="text-xs text-slate-500 mb-1">Seat</div>
-                  <div className="text-2xl font-bold text-slate-900">{p.seat ?? assignSeat(idx)}</div>
+                  <div className="text-xl font-bold text-slate-900">{p.seat ?? assignSeat(idx)}</div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3 text-center">
                   <div className="text-xs text-slate-500 mb-1">Boarding</div>
-                  <div className="text-lg font-bold text-sky-600">{boardingTime}</div>
+                  <div className="text-2xl font-bold text-sky-600">{boardingTime}</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="bg-slate-50 rounded-lg p-3">
                   <div className="text-xs text-slate-500 mb-1">Departure</div>
-                  <div className="text-xl font-bold text-slate-900">{departureTime}</div>
+                  <div className="text-xl font-bold text-slate-900">
+                    {formatTime(flight.departure.time, true)}
+                  </div>
+                  <div className="flex items-center text-xs text-slate-500 mt-1">
+                    <span>{formatDay(flight.departure.time)}</span>
+                    <span className="mx-1">•</span>
+                    <span>{formatDate(flight.departure.time, true)}</span>
+                  </div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-3">
                   <div className="text-xs text-slate-500 mb-1">Arrival</div>
-                  <div className="text-xl font-bold text-slate-900">{formatTime(flight.arrival.time)}</div>
+                  <div className="text-xl font-bold text-slate-900">
+                    {formatTime(flight.arrival.time, true)}
+                  </div>
+                  <div className="flex items-center text-xs text-slate-500 mt-1">
+                    <span>{formatDay(flight.arrival.time)}</span>
+                    <span className="mx-1">•</span>
+                    <span>{formatDate(flight.arrival.time, true)}</span>
+                  </div>
                 </div>
               </div>
 
