@@ -4,6 +4,111 @@ import type { FindBookingResponse, Passenger } from '../types/checkin';
 import { Plane } from 'lucide-react';
 import AppleWalletIcon from '../assets/Apple_Wallet_Icon.svg';
 
+// Function to get full airport name by IATA code
+const getAirportName = (iataCode: string): string => {
+  const airportNames: Record<string, string> = {
+    // Thailand
+    'BKK': 'Suvarnabhumi Airport, Bangkok',
+    'DMK': 'Don Mueang International Airport, Bangkok',
+    'CNX': 'Chiang Mai International Airport',
+    'HKT': 'Phuket International Airport',
+    'HDY': 'Hat Yai International Airport',
+    'KBV': 'Krabi International Airport',
+    'USM': 'Koh Samui Airport',
+    'URT': 'Surat Thani International Airport',
+    'CEI': 'Chiang Rai International Airport',
+    
+    // Singapore
+    'SIN': 'Changi Airport, Singapore',
+    
+    // Malaysia
+    'KUL': 'Kuala Lumpur International Airport',
+    'PEN': 'Penang International Airport',
+    'LGK': 'Langkawi International Airport',
+    'BKI': 'Kota Kinabalu International Airport',
+    
+    // Vietnam
+    'SGN': 'Tan Son Nhat International Airport, Ho Chi Minh City',
+    'HAN': 'Noi Bai International Airport, Hanoi',
+    'DAD': 'Da Nang International Airport',
+    
+    // Japan
+    'NRT': 'Narita International Airport, Tokyo',
+    'HND': 'Haneda Airport, Tokyo',
+    'KIX': 'Kansai International Airport, Osaka',
+    'FUK': 'Fukuoka Airport',
+    'CTS': 'New Chitose Airport, Sapporo',
+    
+    // South Korea
+    'ICN': 'Incheon International Airport, Seoul',
+    'GMP': 'Gimpo International Airport, Seoul',
+    'PUS': 'Gimhae International Airport, Busan',
+    
+    // China
+    'PEK': 'Beijing Capital International Airport',
+    'PVG': 'Shanghai Pudong International Airport',
+    'CAN': 'Guangzhou Baiyun International Airport',
+    'HKG': 'Hong Kong International Airport',
+    'TPE': 'Taiwan Taoyuan International Airport',
+    'MFM': 'Macau International Airport',
+    
+    // Middle East
+    'DXB': 'Dubai International Airport',
+    'AUH': 'Abu Dhabi International Airport',
+    'DOH': 'Hamad International Airport, Doha',
+    'BAH': 'Bahrain International Airport',
+    
+    // Europe
+    'LHR': 'Heathrow Airport, London',
+    'CDG': 'Charles de Gaulle Airport, Paris',
+    'FRA': 'Frankfurt Airport',
+    'AMS': 'Amsterdam Airport Schiphol',
+    'FCO': 'Leonardo da Vinci–Fiumicino Airport, Rome',
+    'MAD': 'Adolfo Suárez Madrid–Barajas Airport',
+    'IST': 'Istanbul Airport',
+    
+    // North America
+    'JFK': 'John F. Kennedy International Airport, New York',
+    'LAX': 'Los Angeles International Airport',
+    'SFO': 'San Francisco International Airport',
+    'YVR': 'Vancouver International Airport',
+    'YYZ': 'Toronto Pearson International Airport',
+    
+    // Oceania
+    'SYD': 'Sydney Airport',
+    'MEL': 'Melbourne Airport',
+    'BNE': 'Brisbane Airport',
+    'AKL': 'Auckland Airport',
+    
+    // Other Major Asian
+    'DEL': 'Indira Gandhi International Airport, Delhi',
+    'BOM': 'Chhatrapati Shivaji Maharaj International Airport, Mumbai',
+    'MNL': 'Ninoy Aquino International Airport, Manila',
+    'CGK': 'Soekarno–Hatta International Airport, Jakarta',
+    'BWN': 'Brunei International Airport',
+    'RGN': 'Yangon International Airport',
+    'REP': 'Siem Reap International Airport',
+    'PNH': 'Phnom Penh International Airport',
+    'VTE': 'Wattay International Airport, Vientiane',
+    'DPS': 'Ngurah Rai International Airport, Bali',
+    
+    // Additional Thai airports
+    'LPT': 'Lampang Airport',
+    'NST': 'Nakhon Si Thammarat Airport',
+    'NAW': 'Narathiwat Airport',
+    'PHS': 'Phitsanulok Airport',
+    'HGN': 'Mae Hong Son Airport',
+    'THS': 'Sukhothai Airport',
+    'TST': 'Trang Airport',
+    'TDX': 'Trat Airport',
+    'UTP': 'U-Tapao International Airport, Rayong',
+    'UBP': 'Ubon Ratchathani Airport',
+    'UTH': 'Udon Thani International Airport'
+  };
+  
+  return airportNames[iataCode] || iataCode;
+};
+
 type BoardingPassProps = {
   booking: FindBookingResponse;
   passengers: Passenger[];
@@ -73,22 +178,38 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                 <div className="text-sm text-slate-600 mt-1">{p.paxType} • PNR: {booking.bookingRef}</div>
               </div>
 
-              {/* Flight route - Large airport codes */}
-              <div className="flex items-center justify-between mb-6 bg-slate-50 rounded-xl p-4">
-                <div className="text-center">
-                  <div className="text-4xl font-black text-slate-900 tracking-tight">{flight.departure.airport}</div>
-                  <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
-                </div>
-                <div className="flex-1 px-4">
-                  <div className="relative">
-                    <div className="border-t-2 border-dashed border-slate-300"></div>
-                    <Plane className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 text-sky-600 bg-slate-50 px-1 rotate-90" />
+              {/* Flight route with airport details */}
+              <div className="mb-6 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div className="text-center flex-1">
+                    <div className="text-xs text-slate-600 mb-1 max-w-[120px] mx-auto">
+                      {getAirportName(flight.departure.airport)}
+                    </div>
+                    <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.departure.airport}</div>
+                    <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
                   </div>
-                  <div className="text-center text-xs text-slate-500 mt-1">{flight.flightNumber}</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-4xl font-black text-slate-900 tracking-tight">{flight.arrival.airport}</div>
-                  <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
+                  
+                  <div className="flex-1 px-2">
+                    <div className="relative">
+                      <div className="border-t-2 border-dashed border-slate-300"></div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 px-2">
+                        <Plane className="w-5 h-5 text-sky-600 rotate-90" />
+                      </div>
+                    </div>
+                    <div className="text-center mt-2">
+                      <span className="inline-block bg-slate-200 text-slate-700 text-xs font-medium px-2 py-0.5 rounded-full">
+                        {flight.flightNumber}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="text-center flex-1">
+                    <div className="text-xs text-slate-600 mb-1 max-w-[120px] mx-auto">
+                      {getAirportName(flight.arrival.airport)}
+                    </div>
+                    <div className="text-4xl font-black text-sky-600 tracking-tight">{flight.arrival.airport}</div>
+                    <div className="text-xs text-slate-500 mt-1">{departureDate}</div>
+                  </div>
                 </div>
               </div>
 
