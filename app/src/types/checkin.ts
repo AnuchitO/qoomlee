@@ -18,6 +18,8 @@ export type Passenger = {
   lastName: string;
   paxType: PaxType;
   seat?: string | null;
+  boardingZone?: string | null;
+  boardingSequence?: string | null;
   checkedIn: boolean;
 };
 

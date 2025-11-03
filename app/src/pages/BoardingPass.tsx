@@ -270,8 +270,17 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                   <div className="text-lg font-bold text-slate-900">{p.seat}</div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-slate-500 mb-0.5">Zone</div>
-                  <div className="text-lg font-bold text-slate-900">{p.boardingZone}</div>
+                  <div className="flex items-center justify-center gap-4">
+                    <div>
+                      <div className="text-xs text-slate-500">Zone</div>
+                      <div className="text-lg font-bold">{p.boardingZone}</div>
+                    </div>
+                    <div className="h-8 w-px bg-slate-200"></div>
+                    <div>
+                      <div className="text-xs text-slate-500">Seq</div>
+                      <div className="text-lg font-bold">{p.boardingSequence}</div>
+                    </div>
+                  </div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
                   <div className="text-xs text-slate-500 mb-0.5">Boarding</div>

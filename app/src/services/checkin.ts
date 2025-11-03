@@ -1,5 +1,6 @@
 import type { CheckinPayload } from '../components/CheckinForm';
 import type { FindBookingResponse } from '../types/checkin';
+import { PaxType } from '../types/checkin';
 
 export class ApiError extends Error {
   code: string;
@@ -39,9 +40,11 @@ export function findBooking(payload: CheckinPayload): Promise<FindBookingRespons
             {
               firstName: 'ALEX',
               lastName: 'HUUM',
-              paxType: 'ADT',
-              seat: null,
-              checkedIn: false,
+              paxType: PaxType.ADT,
+              seat: '12A',
+              boardingZone: '1',
+              boardingSequence: '023',
+              checkedIn: true,
             },
           ],
         });
