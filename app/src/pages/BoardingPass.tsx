@@ -189,11 +189,24 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
 
             {/* Main boarding pass content */}
             <div className="p-5">
-              {/* Passenger name */}
-              <div className="mb-4">
-                <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Passenger</div>
-                <div className="text-xl font-bold text-slate-900">{p.firstName} {p.lastName}</div>
-                <div className="text-sm text-slate-600 mt-1">{p.paxType} • PNR: {booking.bookingRef}</div>
+              {/* Passenger and gate info */}
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Passenger</div>
+                  <div className="text-xl font-bold text-slate-900">{p.firstName} {p.lastName}</div>
+                  <div className="text-sm text-slate-600 mt-1">{p.paxType} • PNR: {booking.bookingRef}</div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-center">
+                    <div className="text-xs text-slate-500">Terminal</div>
+                    <div className="text-lg font-bold">{terminal}</div>
+                  </div>
+                  <div className="h-8 w-px bg-slate-200"></div>
+                  <div className="text-center">
+                    <div className="text-xs text-slate-500">Gate</div>
+                    <div className="text-lg font-bold">{getGate(idx)}</div>
+                  </div>
+                </div>
               </div>
 
               {/* Flight route with airport details */}
@@ -251,15 +264,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
               </div>
 
               {/* Flight details grid */}
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                <div className="bg-slate-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-slate-500 mb-0.5">Terminal</div>
-                  <div className="text-lg font-bold text-slate-900">{terminal}</div>
-                </div>
-                <div className="bg-slate-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-slate-500 mb-0.5">Gate</div>
-                  <div className="text-lg font-bold text-slate-900">{getGate(idx)}</div>
-                </div>
+              <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
                   <div className="text-xs text-slate-500 mb-0.5">Seat</div>
                   <div className="text-lg font-bold text-slate-900">{p.seat}</div>
