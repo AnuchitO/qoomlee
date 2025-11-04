@@ -1,4 +1,5 @@
 import { Page, expect, BrowserContext } from '@playwright/test';
+import { PassengerSelectPage } from './PassengerSelectPage';
 
 export class CheckinPage {
   private requestPromise: Promise<any> | null = null;
@@ -28,38 +29,27 @@ export class CheckinPage {
     try {
       // Click the submit button and wait for navigation
       await Promise.all([
+        this.submitButton.click(),
         this.page.waitForURL('**/checkin/select', { timeout: 10000 }),
-        this.submitButton.click()
       ]);
       
-      // Return the current URL after navigation
-      return this.page.url();
+      // Return the selected passenger select page object
+      return new PassengerSelectPage(this.page);
     } catch (error) {
       console.error('Error during form submission:', error);
-      // Take a screenshot on error
-      await this.takeScreenshot('form-submission-error');
       throw error;
     }
   }
 
   async isAtPassengerDetails() {
-    // Wait for the page to navigate to the next step
-    // Check if we're on the expected URL pattern
     await this.page.waitForURL('**/checkin/select', { timeout: 10000 });
-    
-    // Verify we're not on the home page anymore
     const currentUrl = this.page.url();
     expect(currentUrl).not.toBe('http://localhost:3000/');
     
-    // Take a screenshot for debugging
-    await this.takeScreenshot('after-navigation');
-    
-    // Return true if we've reached this point without errors
     return true;
   }
 
   async verifyValidationError(message: string) {
-    // Look for the error message in the alert div
     await expect(this.page.getByRole('alert')).toContainText(message, { timeout: 5000 });
   }
 

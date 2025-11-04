@@ -1,75 +1,68 @@
 import { test, expect } from '@playwright/test';
 import { CheckinPage } from '../../pages/CheckinPage';
 import { TestData } from '../../fixtures/test-data';
+import { PassengerSelectPage } from '../../pages/PassengerSelectPage';
+import { PassengerDetailsPage } from '../../pages/PassengerDetailsPage';
+import { DangerousGoodsPage } from '../../pages/DangerousGoodsPage';
+import { BoardingPassPage } from '../../pages/BoardingPassPage';
 
 test.describe('Check-in Journey', () => {
   test('check-in form submission', async ({ page }) => {
     const checkinPage = new CheckinPage(page);
     const { booking } = TestData;
+    let selectPassengerPage: PassengerSelectPage;
 
     // Step 1: Navigate to check-in page
     await test.step('Navigate to check-in page', async () => {
       await checkinPage.navigate();
     });
 
-    // Step 2: Verify form elements are present
-    await test.step('Verify form elements', async () => {
-      // Verify input fields are present
-      await expect(page.getByLabel('Booking reference (PNR)')).toBeVisible();
-      await expect(page.getByLabel('Last Name')).toBeVisible();
-      
-      // Verify submit button is present and initially disabled
-      const submitButton = page.getByRole('button', { name: /Retrieve Booking/i });
-      await expect(submitButton).toBeVisible();
-      await expect(submitButton).toBeDisabled();
-      
-    });
-
-    // Step 3: Test form validation
-    await test.step('Test form validation', async () => {
-      // Fill only one field
-      await checkinPage.fillCheckinForm('', booking.lastName);
-      await expect(page.getByRole('button', { name: /Retrieve Booking/i })).toBeDisabled();
-      
-      // Fill the other field
-      await checkinPage.fillCheckinForm(booking.ref, '');
-      await expect(page.getByRole('button', { name: /Retrieve Booking/i })).toBeDisabled();
-      
-      // Fill both fields with invalid data
-      await checkinPage.fillCheckinForm('ABC', 'T');
-      await expect(page.getByRole('button', { name: /Retrieve Booking/i })).toBeDisabled();
-      
-      // Fill with valid data
+    // Step 2: retrieve booking
+    await test.step('retrieve booking', async () => {
       await checkinPage.fillCheckinForm(booking.ref, booking.lastName);
       await expect(page.getByRole('button', { name: /Retrieve Booking/i })).toBeEnabled();
-      
-    });
 
-    // Step 4: Submit the form
-    await test.step('Submit the form', async () => {
-      console.log('Submitting form with booking reference:', booking.ref);
-      
       try {
-        const result = await checkinPage.submitForm();
-        console.log('Form submission result:', result);
-        
-        // Take a screenshot after submission
-        
-        // Log the current URL for debugging
-        const currentUrl = page.url();
-        console.log('Current URL after submission:', currentUrl);
-        
-        // Verify we're not on the home page anymore
-        expect(currentUrl).not.toBe('http://localhost:3000/');
+        selectPassengerPage = await checkinPage.submitForm();
+        await expect(page).toHaveURL(/\/checkin\/select/);
       } catch (error) {
         console.error('Form submission error:', error);
         throw error;
       }
     });
-  });
+    
+    // Step 3: select all passengers
+    await test.step('select all passengers', async () => {
+      await selectPassengerPage.selectAllPassengers();
+      await selectPassengerPage.continue();
+    });
 
-  // This test will be implemented once we have the basic flow working
-  test.skip('invalid booking reference shows error', async ({ page }) => {
-    // Will be implemented later
+    // Step 4: passenger details
+    await test.step('passenger details', async () => {
+      const passengerDetailsPage = new PassengerDetailsPage(page);
+      await passengerDetailsPage.fillPassengerDetails(1, TestData.passenger.phone, TestData.passenger.countryCode, TestData.passenger.nationality);
+      await passengerDetailsPage.fillPassengerDetails(2, TestData.passenger.phone, TestData.passenger.countryCode, TestData.passenger.nationality);
+      await passengerDetailsPage.continue();
+    });
+    
+    // Step 5: Dangerous Goods
+    await test.step('dangerous goods', async () => {
+      const dangerousGoodsPage = new DangerousGoodsPage(page);
+      await dangerousGoodsPage.acceptAndContinue();
+    });
+    
+    // Step 6: Boarding Pass
+    await test.step('boarding pass', async () => {
+      const boardingPassPage = new BoardingPassPage(page);
+      await boardingPassPage.verifyBoardingPass({
+        order: 1,
+        passengerName: TestData.passenger.firstName + ' ' + TestData.passenger.lastName,
+        flightNumber: booking.flightNumber,
+        seatNumber: '12A',
+        zone: '1',
+      });
+      await boardingPassPage.done();
+    });
+    
   });
 });

@@ -6,7 +6,7 @@ export const TestData = {
   },
   passenger: {
     phone: '1234567890',
-    countryCode: 'TH',
+    countryCode: '+66',
     nationality: 'TH',
     firstName: 'ALEX',
     lastName: 'HUUM'

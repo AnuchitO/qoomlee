@@ -3,24 +3,18 @@ import { Page, expect } from '@playwright/test';
 export class PassengerDetailsPage {
   constructor(private readonly page: Page) {}
 
-  async fillPassengerDetails(phone: string, countryCode: string, nationality: string) {
-    // Fill phone number
-    await this.page.getByLabel('Phone Number*').fill(phone);
-    
-    // Select country code if the dropdown exists
-    const countryCodeSelect = this.page.locator('select[name="countryCode"]');
-    if (await countryCodeSelect.count() > 0) {
-      await countryCodeSelect.selectOption(countryCode);
-    }
+  async fillPassengerDetails(order: number, phone: string, countryCode: string, nationality: string) {
+    const nationalityInput = this.page.getByTestId(`nationality-${order}`);
+    await nationalityInput.scrollIntoViewIfNeeded();
+    await nationalityInput.fill(nationality);
 
-    // Select nationality if the dropdown exists
-    const nationalitySelect = this.page.locator('select[name="nationality"]');
-    if (await nationalitySelect.count() > 0) {
-      await nationalitySelect.selectOption(nationality);
-    }
+    const countryCodeSelect = this.page.getByTestId(`countryCode-${order}`);
+    await countryCodeSelect.scrollIntoViewIfNeeded();
+    await countryCodeSelect.selectOption(countryCode);
 
-    // Submit the form
-    await this.page.getByRole('button', { name: /Continue to Boarding Pass/i }).click();
+    const phoneInput = this.page.getByTestId(`phone-${order}`);
+    await phoneInput.scrollIntoViewIfNeeded();
+    await phoneInput.fill(phone);
   }
 
   async isAtBoardingPass() {
@@ -33,5 +27,13 @@ export class PassengerDetailsPage {
 
   async verifyFlightNumber(flightNumber: string) {
     await expect(this.page.getByText(flightNumber)).toBeVisible();
+  }
+
+  async continue() {
+    await this.page.getByRole('button', { name: 'Continue' }).click();
+  }
+
+  async back() {
+    await this.page.getByRole('button', { name: 'Back' }).click();
   }
 }
