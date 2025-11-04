@@ -157,9 +157,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
   const departureTime = formatTime(flight.departure.time);
   const boardingTime = formatTime(new Date(new Date(flight.departure.time).getTime() - 40 * 60000).toISOString());
   
-  // Mock gate and terminal data
-  const getGate = (idx: number) => `${String.fromCharCode(65 + (idx % 4))}${12 + idx}`;
-  const terminal = '2';
+  // Use terminal and gate from flight data
 
   const handleFinish = () => {
     reset();
@@ -199,12 +197,12 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                 <div className="flex items-center gap-4">
                   <div className="text-center">
                     <div className="text-xs text-slate-500">Terminal</div>
-                    <div className="text-lg font-bold">{terminal}</div>
+                    <div className="text-lg font-bold">{flight.terminal || 'TBD'}</div>
                   </div>
                   <div className="h-8 w-px bg-slate-200"></div>
                   <div className="text-center">
                     <div className="text-xs text-slate-500">Gate</div>
-                    <div className="text-lg font-bold">{getGate(idx)}</div>
+                    <div className="text-lg font-bold">{flight.gate || 'TBD'}</div>
                   </div>
                 </div>
               </div>

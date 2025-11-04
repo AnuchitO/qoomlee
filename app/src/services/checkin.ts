@@ -28,12 +28,22 @@ export function findBooking(payload: CheckinPayload): Promise<FindBookingRespons
           bookingRef: payload.bookingRef,
           journeys: [
             {
+              departure: {
+                airport: 'BKK',
+                time: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+                terminal: '1'
+              },
+              arrival: {
+                airport: 'SIN',
+                time: new Date(Date.now() + 26 * 3600 * 1000).toISOString(),
+                terminal: '1'
+              },
               flightNumber: 'QL123',
-              departure: { airport: 'BKK', time: new Date(Date.now() + 24 * 3600 * 1000).toISOString() },
-              arrival: { airport: 'SIN', time: new Date(Date.now() + 26 * 3600 * 1000).toISOString() },
               segmentStatus: 'CHECKIN_OPEN',
               marketingCarrier: 'QL',
               operatingCarrier: 'QL',
+              terminal: '1',
+              gate: '40'
             },
           ],
           passengers: [
@@ -46,6 +56,15 @@ export function findBooking(payload: CheckinPayload): Promise<FindBookingRespons
               boardingSequence: '023',
               checkedIn: true,
             },
+            {
+              firstName: 'Somsee',
+              lastName: 'Kuum',
+              paxType: PaxType.ADT,
+              seat: '12B',
+              boardingZone: '1',
+              boardingSequence: '022',
+              checkedIn: true,
+            }
           ],
         });
       } else {

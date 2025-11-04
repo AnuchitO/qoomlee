@@ -1,10 +1,20 @@
 export type JourneySegment = {
   flightNumber: string;
-  departure: { airport: string; time: string };
-  arrival: { airport: string; time: string };
+  departure: { 
+    airport: string; 
+    time: string; 
+    terminal?: string;
+  };
+  arrival: { 
+    airport: string; 
+    time: string; 
+    terminal?: string;
+  };
   segmentStatus: 'SCHEDULED' | 'CHECKIN_OPEN' | 'CLOSED';
   marketingCarrier: string;
   operatingCarrier: string;
+  terminal?: string;
+  gate?: string;
 };
 
 export enum PaxType {
