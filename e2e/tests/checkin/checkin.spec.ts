@@ -10,7 +10,6 @@ test.describe('Check-in Journey', () => {
     // Step 1: Navigate to check-in page
     await test.step('Navigate to check-in page', async () => {
       await checkinPage.navigate();
-      await checkinPage.takeScreenshot('initial page load');
     });
 
     // Step 2: Verify form elements are present
@@ -24,7 +23,6 @@ test.describe('Check-in Journey', () => {
       await expect(submitButton).toBeVisible();
       await expect(submitButton).toBeDisabled();
       
-      await checkinPage.takeScreenshot('form elements verified');
     });
 
     // Step 3: Test form validation
@@ -45,7 +43,6 @@ test.describe('Check-in Journey', () => {
       await checkinPage.fillCheckinForm(booking.ref, booking.lastName);
       await expect(page.getByRole('button', { name: /Retrieve Booking/i })).toBeEnabled();
       
-      await checkinPage.takeScreenshot('form validation passed');
     });
 
     // Step 4: Submit the form
@@ -57,7 +54,6 @@ test.describe('Check-in Journey', () => {
         console.log('Form submission result:', result);
         
         // Take a screenshot after submission
-        await checkinPage.takeScreenshot('after form submission');
         
         // Log the current URL for debugging
         const currentUrl = page.url();
@@ -67,7 +63,6 @@ test.describe('Check-in Journey', () => {
         expect(currentUrl).not.toBe('http://localhost:3000/');
       } catch (error) {
         console.error('Form submission error:', error);
-        await checkinPage.takeScreenshot('form submission error');
         throw error;
       }
     });
