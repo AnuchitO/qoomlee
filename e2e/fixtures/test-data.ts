@@ -2,13 +2,48 @@ export const TestData = {
   booking: {
     ref: 'ABC123',
     lastName: 'HUUM',
-    flightNumber: 'QL123'
+    flightNumber: 'QL123',
+    departureDate: '5 Nov 2025',
+    departureTime: '21:03',
+    arrivalDate: '5 Nov 2025',
+    arrivalTime: '00:02',
+    departureAirportCode: 'BKK',
+    arrivalAirportCode: 'SIN',
+    terminal: '1',
+    gate: '40',
+    boardingTime: '20:23',
+    boardingSequence: '1',
+    departureDay: 'Wed•5 Nov 2025',
+    arrivalDay: 'Wed•5 Nov 2025',
+    departureTimeTz: 'UTC+7',
+    arrivalTimeTz: 'UTC+8',
+    departureAirportName: 'Suvarnabhumi Airport, Bangkok',
+    arrivalAirportName: 'Changi International Airport, Singapore',
   },
-  passenger: {
-    phone: '1234567890',
-    countryCode: '+66',
-    nationality: 'TH',
-    firstName: 'ALEX',
-    lastName: 'HUUM'
-  }
+  passengers: [
+    {
+      firstName: 'ALEX',
+      lastName: 'HUUM',
+      paxType: 'ADT',
+      seat: '12A',
+      boardingZone: '1',
+      boardingSequence: '023',
+      checkedIn: true,
+      phone: '1234567890',
+      countryCode: '+66',
+      nationality: 'TH',
+    },
+    {
+      firstName: 'Somsee',
+      lastName: 'Kuum',
+      paxType: 'ADT',
+      seat: '12B',
+      boardingZone: '1',
+      boardingSequence: '022',
+      checkedIn: true,
+      phone: '1234567890',
+      countryCode: '+66',
+      nationality: 'TH',
+    }
+  ],
 } as const;

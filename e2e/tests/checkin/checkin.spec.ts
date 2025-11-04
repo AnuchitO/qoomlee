@@ -30,7 +30,7 @@ test.describe('Check-in Journey', () => {
         throw error;
       }
     });
-    
+
     // Step 3: select all passengers
     await test.step('select all passengers', async () => {
       await selectPassengerPage.selectAllPassengers();
@@ -40,29 +40,45 @@ test.describe('Check-in Journey', () => {
     // Step 4: passenger details
     await test.step('passenger details', async () => {
       const passengerDetailsPage = new PassengerDetailsPage(page);
-      await passengerDetailsPage.fillPassengerDetails(1, TestData.passenger.phone, TestData.passenger.countryCode, TestData.passenger.nationality);
-      await passengerDetailsPage.fillPassengerDetails(2, TestData.passenger.phone, TestData.passenger.countryCode, TestData.passenger.nationality);
+      await passengerDetailsPage.fillPassengerDetails(1, TestData.passengers[0].phone, TestData.passengers[0].countryCode, TestData.passengers[0].nationality);
+      await passengerDetailsPage.fillPassengerDetails(2, TestData.passengers[1].phone, TestData.passengers[1].countryCode, TestData.passengers[1].nationality);
       await passengerDetailsPage.continue();
     });
-    
+
     // Step 5: Dangerous Goods
     await test.step('dangerous goods', async () => {
       const dangerousGoodsPage = new DangerousGoodsPage(page);
       await dangerousGoodsPage.acceptAndContinue();
     });
-    
+
     // Step 6: Boarding Pass
     await test.step('boarding pass', async () => {
       const boardingPassPage = new BoardingPassPage(page);
       await boardingPassPage.verifyBoardingPass({
         order: 1,
-        passengerName: TestData.passenger.firstName + ' ' + TestData.passenger.lastName,
+        passengerName: TestData.passengers[0].firstName + ' ' + TestData.passengers[0].lastName,
         flightNumber: booking.flightNumber,
-        seatNumber: '12A',
-        zone: '1',
+        seatNumber: TestData.passengers[0].seat,
+        zone: TestData.passengers[0].boardingZone,
+        boardingTime: TestData.booking.boardingTime,
+        terminal: TestData.booking.terminal,
+        gate: TestData.booking.gate,
+        departureAirportName: TestData.booking.departureAirportName,
+        departureAirportCode: TestData.booking.departureAirportCode,
+        departureDate: TestData.booking.departureDate,
+        arrivalAirportName: TestData.booking.arrivalAirportName,
+        arrivalAirportCode: TestData.booking.arrivalAirportCode,
+        arrivalDate: TestData.booking.arrivalDate,
+        departureTime: TestData.booking.departureTime,
+        departureTimeTz: TestData.booking.departureTimeTz,
+        arrivalTime: TestData.booking.arrivalTime,
+        arrivalTimeTz: TestData.booking.arrivalTimeTz,
+        departureDay: TestData.booking.departureDay,
+        arrivalDay: TestData.booking.arrivalDay,
+        boardingSequence: TestData.passengers[0].boardingSequence,
       });
       await boardingPassPage.done();
     });
-    
+
   });
 });

@@ -3,6 +3,7 @@ import { useCheckin } from '../context/CheckinContext';
 import type { FindBookingResponse, Passenger } from '../types/checkin';
 import { Plane } from 'lucide-react';
 import AppleWalletIcon from '../assets/Apple_Wallet_Icon.svg';
+import { DateTime } from 'luxon';
 
 // Function to get full airport name by IATA code
 const getAirportName = (iataCode: string): string => {
@@ -19,7 +20,7 @@ const getAirportName = (iataCode: string): string => {
     'CEI': 'Chiang Rai International Airport',
     
     // Singapore
-    'SIN': 'Changi Airport, Singapore',
+    'SIN': 'Changi International Airport, Singapore',
     
     // Malaysia
     'KUL': 'Kuala Lumpur International Airport',
@@ -128,16 +129,12 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
   
   // Format time as HH:MM with timezone
   const formatTime = (dateString: string, includeTz = false, testId: string) => {
-    const date = new Date(dateString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const date = DateTime.fromISO(dateString, { setZone: true });
+    const hours = date.hour.toString().padStart(2, '0');
+    const minutes = date.minute.toString().padStart(2, '0');
     if (!includeTz) return `${hours}:${minutes}`;
     
-    const tz = date.toLocaleTimeString('en', { 
-      timeZoneName: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).split(' ')[2];
+    const tz = date.offsetNameShort;
     
     return (
       <span className="inline-flex items-baseline">
@@ -161,7 +158,8 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
     return new Date(dateString).toLocaleDateString('en', { weekday: 'short' });
   };
   
-  const boardingTime = formatTime(new Date(new Date(flight.departure.time).getTime() - 40 * 60000).toISOString(), false, 'boardingTime');
+
+  const boardingTime = formatTime(DateTime.fromISO(flight.departure.time).minus({ minutes: 40 }).toISO(), false, 'boardingTime');
   
   // Use terminal and gate from flight data
 

@@ -30,12 +30,12 @@ export function findBooking(payload: CheckinPayload): Promise<FindBookingRespons
             {
               departure: {
                 airport: 'BKK',
-                time: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
+                time: '2025-11-05T21:03:00+07:00',
                 terminal: '1'
               },
               arrival: {
                 airport: 'SIN',
-                time: new Date(Date.now() + 26 * 3600 * 1000).toISOString(),
+                time: '2025-11-06T00:02:00+08:00',
                 terminal: '1'
               },
               flightNumber: 'QL123',
