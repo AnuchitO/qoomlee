@@ -177,7 +177,6 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
     <>
       <div className="space-y-4 mb-4">
         {passengers.map((p, idx) => {
-          const order = idx + 1;
           return (
           <div key={`${p.firstName}-${p.lastName}-${idx}`} className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
             {/* Header with Qoomlee branding */}
@@ -198,17 +197,17 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                 <div>
                   <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Passenger</div>
                   <div className="text-xl font-bold text-slate-900">{p.firstName} {p.lastName}</div>
-                  <div className="text-sm text-slate-600 mt-1" data-testid={`paxType-${order}`}>{p.paxType} • PNR: {booking.bookingRef}</div>
+                  <div className="text-sm text-slate-600 mt-1" data-testid={`paxType-${idx}`}>{p.paxType} • PNR: {booking.bookingRef}</div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
                     <div className="text-xs text-slate-500">Terminal</div>
-                    <div className="text-lg font-bold" data-testid={`terminal-${order}`}>{flight.terminal || 'TBD'}</div>
+                    <div className="text-lg font-bold" data-testid={`terminal-${idx}`}>{flight.terminal || 'TBD'}</div>
                   </div>
                   <div className="h-8 w-px bg-slate-200"></div>
                   <div className="text-center">
                     <div className="text-xs text-slate-500">Gate</div>
-                    <div className="text-lg font-bold" data-testid={`gate-${order}`}>{flight.gate || 'TBD'}</div>
+                    <div className="text-lg font-bold" data-testid={`gate-${idx}`}>{flight.gate || 'TBD'}</div>
                   </div>
                 </div>
               </div>
@@ -219,16 +218,16 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                   {/* Departure */}
                   <div className="text-center">
                     <div className="h-8 flex items-center justify-center">
-                      <span className="text-xs text-slate-600 line-clamp-2 px-2" data-testid={`departureAirportName-${order}`}>
+                      <span className="text-xs text-slate-600 line-clamp-2 px-2" data-testid={`departureAirportName-${idx}`}>
                         {getAirportName(flight.departure.airport)}
                       </span>
                     </div>
                     <div className="h-16 flex items-center justify-center">
-                      <span className="text-4xl font-black text-sky-600 tracking-tight" data-testid={`departureAirportCode-${order}`}>
+                      <span className="text-4xl font-black text-sky-600 tracking-tight" data-testid={`departureAirportCode-${idx}`}>
                         {flight.departure.airport}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500" data-testid={`departureDate-${order}`}>
+                    <div className="text-xs text-slate-500" data-testid={`departureDate-${idx}`}>
                       {formatDate(flight.departure.time, true)}
                     </div>
                   </div>
@@ -242,7 +241,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                       </div>
                     </div>
                     <div className="text-center mt-2">
-                      <span className="inline-block bg-slate-200 text-slate-700 text-xs font-medium px-2 py-0.5 rounded-full" data-testid={`flightNumber-${order}`}>
+                      <span className="inline-block bg-slate-200 text-slate-700 text-xs font-medium px-2 py-0.5 rounded-full" data-testid={`flightNumber-${idx}`}>
                         {flight.flightNumber}
                       </span>
                     </div>
@@ -251,16 +250,16 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                   {/* Arrival */}
                   <div className="text-center">
                     <div className="h-8 flex items-center justify-center">
-                      <span className="text-xs text-slate-600 line-clamp-2 px-2" data-testid={`arrivalAirportName-${order}`}>
+                      <span className="text-xs text-slate-600 line-clamp-2 px-2" data-testid={`arrivalAirportName-${idx}`}>
                         {getAirportName(flight.arrival.airport)}
                       </span>
                     </div>
                     <div className="h-16 flex items-center justify-center">
-                      <span className="text-4xl font-black text-sky-600 tracking-tight" data-testid={`arrivalAirportCode-${order}`}>
+                      <span className="text-4xl font-black text-sky-600 tracking-tight" data-testid={`arrivalAirportCode-${idx}`}>
                         {flight.arrival.airport}
                       </span>
                     </div>
-                    <div className="text-xs text-slate-500" data-testid={`arrivalDate-${order}`}>
+                    <div className="text-xs text-slate-500" data-testid={`arrivalDate-${idx}`}>
                       {formatDate(flight.arrival.time, true)}
                     </div>
                   </div>
@@ -271,24 +270,24 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
               <div className="grid grid-cols-3 gap-2 mb-4">
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
                   <div className="text-xs text-slate-500 mb-0.5">Seat</div>
-                  <div className="text-lg font-bold text-slate-900" data-testid={`seat-${order}`}>{p.seat}</div>
+                  <div className="text-lg font-bold text-slate-900" data-testid={`seat-${idx}`}>{p.seat}</div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
                   <div className="flex items-center justify-center gap-4">
                     <div>
                       <div className="text-xs text-slate-500">Zone</div>
-                      <div className="text-lg font-bold" data-testid={`boardingZone-${order}`}>{p.boardingZone}</div>
+                      <div className="text-lg font-bold" data-testid={`boardingZone-${idx}`}>{p.boardingZone}</div>
                     </div>
                     <div className="h-8 w-px bg-slate-200"></div>
                     <div>
                       <div className="text-xs text-slate-500">Seq</div>
-                      <div className="text-lg font-bold" data-testid={`boardingSequence-${order}`}>{p.boardingSequence}</div>
+                      <div className="text-lg font-bold" data-testid={`boardingSequence-${idx}`}>{p.boardingSequence}</div>
                     </div>
                   </div>
                 </div>
                 <div className="bg-slate-50 rounded-lg p-2 text-center">
                   <div className="text-xs text-slate-500 mb-0.5">Boarding</div>
-                  <div className="text-xl font-bold text-sky-600" data-testid={`boardingTime-${order}`}>{boardingTime}</div>
+                  <div className="text-xl font-bold text-sky-600" data-testid={`boardingTime-${idx}`}>{boardingTime}</div>
                 </div>
               </div>
 
@@ -296,9 +295,9 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                 <div className="bg-slate-50 rounded-lg p-3">
                   <div className="text-xs text-slate-500 mb-1">Departure</div>
                   <div className="text-xl font-bold text-slate-900">
-                    {formatTime(flight.departure.time, true, `departureTime-${order}`)}
+                    {formatTime(flight.departure.time, true, `departureTime-${idx}`)}
                   </div>
-                  <div className="flex items-center text-xs text-slate-500 mt-1" data-testid={`departureDay-${order}`}>
+                  <div className="flex items-center text-xs text-slate-500 mt-1" data-testid={`departureDay-${idx}`}>
                     <span>{formatDay(flight.departure.time)}</span>
                     <span className="mx-1">•</span>
                     <span>{formatDate(flight.departure.time, true)}</span>
@@ -307,9 +306,9 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                 <div className="bg-slate-50 rounded-lg p-3">
                   <div className="text-xs text-slate-500 mb-1">Arrival</div>
                   <div className="text-xl font-bold text-slate-900">
-                    {formatTime(flight.arrival.time, true, `arrivalTime-${order}`)}
+                    {formatTime(flight.arrival.time, true, `arrivalTime-${idx}`)}
                   </div>
-                  <div className="flex items-center text-xs text-slate-500 mt-1" data-testid={`arrivalDay-${order}`}>
+                  <div className="flex items-center text-xs text-slate-500 mt-1" data-testid={`arrivalDay-${idx}`}>
                     <span>{formatDay(flight.arrival.time)}</span>
                     <span className="mx-1">•</span>
                     <span>{formatDate(flight.arrival.time, true)}</span>

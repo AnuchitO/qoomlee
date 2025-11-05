@@ -40,8 +40,8 @@ test.describe('Check-in Journey', () => {
     // Step 4: passenger details
     await test.step('passenger details', async () => {
       const passengerDetailsPage = new PassengerDetailsPage(page);
-      await passengerDetailsPage.fillPassengerDetails(1, TestData.passengers[0].phone, TestData.passengers[0].countryCode, TestData.passengers[0].nationality);
-      await passengerDetailsPage.fillPassengerDetails(2, TestData.passengers[1].phone, TestData.passengers[1].countryCode, TestData.passengers[1].nationality);
+      await passengerDetailsPage.fillPassengerDetails(0, TestData.passengers[0].phone, TestData.passengers[0].countryCode, TestData.passengers[0].nationality);
+      await passengerDetailsPage.fillPassengerDetails(1, TestData.passengers[1].phone, TestData.passengers[1].countryCode, TestData.passengers[1].nationality);
       await passengerDetailsPage.continue();
     });
 
@@ -55,7 +55,7 @@ test.describe('Check-in Journey', () => {
     await test.step('boarding pass', async () => {
       const boardingPassPage = new BoardingPassPage(page);
       await boardingPassPage.verifyBoardingPass({
-        order: 1,
+        order: 0,
         passengerName: TestData.passengers[0].firstName + ' ' + TestData.passengers[0].lastName,
         flightNumber: booking.flightNumber,
         seatNumber: TestData.passengers[0].seat,

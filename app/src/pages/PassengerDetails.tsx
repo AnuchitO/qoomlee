@@ -105,18 +105,17 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
           {passengers.map((p, idx) => {
             const k = keyFor(p);
             const d = details[k];
-            const order = idx + 1;
             return (
               <div key={k} className="border border-slate-200 rounded-lg p-4">
                 <div className="font-semibold text-slate-800 mb-3 text-base">
-                  {order}. {p.firstName} {p.lastName}
+                  {idx + 1}. {p.firstName} {p.lastName}
                 </div>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 mb-2">Nationality</label>
                     <input
                       type="text"
-                      data-testid={'nationality-' + order}
+                      data-testid={'nationality-' + idx}
                       value={d.nationality}
                       onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], nationality: e.target.value.toUpperCase() } }))}
                       onBlur={() => setTouched((s) => ({ ...s, [k]: { ...s[k], nationality: true } }))}
@@ -143,7 +142,7 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
                       <div className="flex-shrink-0">
                         <select
                           value={d.countryCode}
-                          data-testid={'countryCode-' + order}
+                          data-testid={'countryCode-' + idx}
                           onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], countryCode: e.target.value } }))}
                           className={`w-28 px-3 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation bg-white cursor-pointer border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200`}
                         >
@@ -160,7 +159,7 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
                       <div className="flex-1">
                         <input
                           type="tel"
-                          data-testid={'phone-' + order}
+                          data-testid={'phone-' + idx}
                           value={d.phone}
                           onChange={(e) => setDetails((s) => ({ ...s, [k]: { ...s[k], phone: e.target.value } }))}
                           onBlur={() => setTouched((s) => ({ ...s, [k]: { ...s[k], phone: true } }))}
