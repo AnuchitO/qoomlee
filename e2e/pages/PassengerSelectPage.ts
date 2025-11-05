@@ -3,8 +3,12 @@ import { Page, expect } from '@playwright/test';
 export class PassengerSelectPage {
   constructor(private readonly page: Page) {}
 
-  async selectPassenger(passengerName: string) {
-    await this.page.getByRole('option', { name: passengerName }).click();
+  private passenger(order: number) {
+    return this.page.getByTestId(`passenger-${order}`);
+  }
+
+  async selectPassenger(order: number) {
+    await this.passenger(order).click();
   }
 
   async selectAllPassengers() {

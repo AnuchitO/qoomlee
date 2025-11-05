@@ -4,7 +4,7 @@ export class DangerousGoodsPage {
   constructor(private readonly page: Page) {}
 
   async acceptAndContinue() {
-    await this.page.getByRole('button', { name: 'Accept & Continue' }).click(); 
+    await this.page.getByRole('button', { name: 'Accept & Continue' }).click();
   }
 
   async back() {

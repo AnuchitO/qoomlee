@@ -2,14 +2,24 @@ import { Page, expect, BrowserContext } from '@playwright/test';
 import { PassengerSelectPage } from './PassengerSelectPage';
 
 export class CheckinPage {
-  private requestPromise: Promise<any> | null = null;
+  constructor(private readonly page: Page, private context?: BrowserContext) {}
 
-  // Define the submit button getter
   private get submitButton() {
     return this.page.getByRole('button', { name: 'Retrieve Booking' });
   }
 
-  constructor(private readonly page: Page, private context?: BrowserContext) {}
+  private get lastNameInput() {
+    return this.page.getByLabel('Last Name');
+  }
+
+  private get bookingRefInput() {
+    return this.page.getByLabel('Booking reference (PNR)');
+  }
+
+  private get errorModal() {
+    return this.page.getByRole('dialog');
+  }
+
 
   async navigate() {
     await this.page.goto('/');
@@ -18,11 +28,8 @@ export class CheckinPage {
   }
 
   async fillCheckinForm(bookingRef: string, lastName: string) {
-    // Fill in the booking reference (PNR)
-    await this.page.getByLabel('Booking reference (PNR)').fill(bookingRef);
-
-    // Fill in the last name
-    await this.page.getByLabel('Last Name').fill(lastName);
+    await this.lastNameInput.fill(lastName);
+    await this.bookingRefInput.fill(bookingRef);
   }
 
   async submitForm(): Promise<CheckinPage | PassengerSelectPage> {
@@ -55,14 +62,5 @@ export class CheckinPage {
     expect(currentUrl).not.toBe('http://localhost:3000/');
 
     return true;
-  }
-
-  async verifyValidationError(message: string) {
-    await expect(this.page.getByRole('alert')).toContainText(message, { timeout: 5000 });
-  }
-
-  async takeScreenshot(name: string) {
-    const safeName = name.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-    await this.page.screenshot({ path: `screenshot-${safeName}.png` });
   }
 }

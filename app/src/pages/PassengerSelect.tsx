@@ -37,6 +37,7 @@ export default function PassengerSelect({ passengers, onNext, onBack }: Passenge
             return (
               <button
                 key={`${p.firstName}-${p.lastName}-${idx}`}
+                data-testid={`passenger-${idx}`}
                 type="button"
                 onClick={() => setSelected((s) => ({ ...s, [idx]: !s[idx] }))}
                 className={`relative w-full text-left px-4 py-4 rounded-xl border-2 transition-all touch-manipulation overflow-hidden ${isSelected
