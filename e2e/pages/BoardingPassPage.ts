@@ -3,9 +3,6 @@ import { Page, expect } from '@playwright/test';
 export class BoardingPassPage {
   constructor(private readonly page: Page) {}
 
-  /**
-   * Verify all key elements of the boarding pass
-   */
   async verifyBoardingPass({
     order,
     passengerName,
@@ -54,7 +51,7 @@ export class BoardingPassPage {
     // Verify passenger name and boarding pass title
     await expect(this.page.getByText(passengerName)).toBeVisible();
     await expect(this.page.getByText('Boarding Pass').first()).toBeVisible();
-    
+
 
     // Verify Terminal
     const terminalElement = this.page.getByTestId(`terminal-${order}`);

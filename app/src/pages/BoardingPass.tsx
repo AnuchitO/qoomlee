@@ -18,33 +18,33 @@ const getAirportName = (iataCode: string): string => {
     'USM': 'Koh Samui Airport',
     'URT': 'Surat Thani International Airport',
     'CEI': 'Chiang Rai International Airport',
-    
+
     // Singapore
     'SIN': 'Changi International Airport, Singapore',
-    
+
     // Malaysia
     'KUL': 'Kuala Lumpur International Airport',
     'PEN': 'Penang International Airport',
     'LGK': 'Langkawi International Airport',
     'BKI': 'Kota Kinabalu International Airport',
-    
+
     // Vietnam
     'SGN': 'Tan Son Nhat International Airport, Ho Chi Minh City',
     'HAN': 'Noi Bai International Airport, Hanoi',
     'DAD': 'Da Nang International Airport',
-    
+
     // Japan
     'NRT': 'Narita International Airport, Tokyo',
     'HND': 'Haneda Airport, Tokyo',
     'KIX': 'Kansai International Airport, Osaka',
     'FUK': 'Fukuoka Airport',
     'CTS': 'New Chitose Airport, Sapporo',
-    
+
     // South Korea
     'ICN': 'Incheon International Airport, Seoul',
     'GMP': 'Gimpo International Airport, Seoul',
     'PUS': 'Gimhae International Airport, Busan',
-    
+
     // China
     'PEK': 'Beijing Capital International Airport',
     'PVG': 'Shanghai Pudong International Airport',
@@ -52,13 +52,13 @@ const getAirportName = (iataCode: string): string => {
     'HKG': 'Hong Kong International Airport',
     'TPE': 'Taiwan Taoyuan International Airport',
     'MFM': 'Macau International Airport',
-    
+
     // Middle East
     'DXB': 'Dubai International Airport',
     'AUH': 'Abu Dhabi International Airport',
     'DOH': 'Hamad International Airport, Doha',
     'BAH': 'Bahrain International Airport',
-    
+
     // Europe
     'LHR': 'Heathrow Airport, London',
     'CDG': 'Charles de Gaulle Airport, Paris',
@@ -67,20 +67,20 @@ const getAirportName = (iataCode: string): string => {
     'FCO': 'Leonardo da Vinci–Fiumicino Airport, Rome',
     'MAD': 'Adolfo Suárez Madrid–Barajas Airport',
     'IST': 'Istanbul Airport',
-    
+
     // North America
     'JFK': 'John F. Kennedy International Airport, New York',
     'LAX': 'Los Angeles International Airport',
     'SFO': 'San Francisco International Airport',
     'YVR': 'Vancouver International Airport',
     'YYZ': 'Toronto Pearson International Airport',
-    
+
     // Oceania
     'SYD': 'Sydney Airport',
     'MEL': 'Melbourne Airport',
     'BNE': 'Brisbane Airport',
     'AKL': 'Auckland Airport',
-    
+
     // Other Major Asian
     'DEL': 'Indira Gandhi International Airport, Delhi',
     'BOM': 'Chhatrapati Shivaji Maharaj International Airport, Mumbai',
@@ -92,7 +92,7 @@ const getAirportName = (iataCode: string): string => {
     'PNH': 'Phnom Penh International Airport',
     'VTE': 'Wattay International Airport, Vientiane',
     'DPS': 'Ngurah Rai International Airport, Bali',
-    
+
     // Additional Thai airports
     'LPT': 'Lampang Airport',
     'NST': 'Nakhon Si Thammarat Airport',
@@ -106,7 +106,7 @@ const getAirportName = (iataCode: string): string => {
     'UBP': 'Ubon Ratchathani Airport',
     'UTH': 'Udon Thani International Airport'
   };
-  
+
   return airportNames[iataCode] || iataCode;
 };
 
@@ -126,16 +126,16 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
   const navigate = useNavigate();
   const { reset } = useCheckin();
   const flight = booking.journeys[0];
-  
+
   // Format time as HH:MM with timezone
   const formatTime = (dateString: string, includeTz = false, testId: string) => {
     const date = DateTime.fromISO(dateString, { setZone: true });
     const hours = date.hour.toString().padStart(2, '0');
     const minutes = date.minute.toString().padStart(2, '0');
     if (!includeTz) return `${hours}:${minutes}`;
-    
+
     const tz = date.offsetNameShort;
-    
+
     return (
       <span className="inline-flex items-baseline">
         <span className="text-2xl" data-testid={testId + '-time'}>{hours}:{minutes}</span>
@@ -143,7 +143,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
       </span>
     );
   };
-  
+
   // Format date as DD MMM YYYY
   const formatDate = (dateString: string, includeYear = false) => {
     const date = new Date(dateString);
@@ -152,22 +152,22 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
     const year = date.getFullYear();
     return includeYear ? `${day} ${month} ${year}` : `${day} ${month}`;
   };
-  
+
   // Format day of week (e.g., Mon, Tue)
   const formatDay = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en', { weekday: 'short' });
   };
-  
+
 
   const boardingTime = formatTime(DateTime.fromISO(flight.departure.time).minus({ minutes: 40 }).toISO(), false, 'boardingTime');
-  
+
   // Use terminal and gate from flight data
 
   const handleFinish = () => {
     reset();
     navigate('/');
   };
-  
+
   const handleAddToWallet = (passenger: Passenger) => {
     // In a real app, this would generate a .pkpass file
     alert(`Adding boarding pass for ${passenger.firstName} ${passenger.lastName} to Apple Wallet`);
@@ -231,7 +231,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                       {formatDate(flight.departure.time, true)}
                     </div>
                   </div>
-                  
+
                   {/* Flight Info */}
                   <div className="px-2">
                     <div className="relative">
@@ -246,7 +246,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
                       </span>
                     </div>
                   </div>
-                  
+
                   {/* Arrival */}
                   <div className="text-center">
                     <div className="h-8 flex items-center justify-center">

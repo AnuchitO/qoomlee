@@ -12,7 +12,6 @@ export const TestData = {
     terminal: '1',
     gate: '40',
     boardingTime: '20:23',
-    boardingSequence: '1',
     departureDay: 'Wed•5 Nov 2025',
     arrivalDay: 'Wed•5 Nov 2025',
     departureTimeTz: 'UTC+7',

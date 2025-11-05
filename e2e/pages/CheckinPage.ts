@@ -3,12 +3,12 @@ import { PassengerSelectPage } from './PassengerSelectPage';
 
 export class CheckinPage {
   private requestPromise: Promise<any> | null = null;
-  
+
   // Define the submit button getter
   private get submitButton() {
     return this.page.getByRole('button', { name: 'Retrieve Booking' });
   }
-  
+
   constructor(private readonly page: Page, private context?: BrowserContext) {}
 
   async navigate() {
@@ -20,21 +20,29 @@ export class CheckinPage {
   async fillCheckinForm(bookingRef: string, lastName: string) {
     // Fill in the booking reference (PNR)
     await this.page.getByLabel('Booking reference (PNR)').fill(bookingRef);
-    
+
     // Fill in the last name
     await this.page.getByLabel('Last Name').fill(lastName);
   }
 
-  async submitForm() {
+  async submitForm(): Promise<CheckinPage | PassengerSelectPage> {
     try {
-      // Click the submit button and wait for navigation
-      await Promise.all([
-        this.submitButton.click(),
-        this.page.waitForURL('**/checkin/select', { timeout: 10000 }),
+      await this.submitButton.click();
+
+      const isGoToPassengerSelectPage = this.page.waitForURL('**/checkin/select', { timeout: 10000 });
+      const isShowErrorModal = this.page.waitForSelector('div[role="dialog"]', { state: 'visible', timeout: 5000 });
+
+      const result = await Promise.race([
+        isGoToPassengerSelectPage.then(() => 'passenger-select'),
+        isShowErrorModal.then(() => 'error-modal'),
       ]);
-      
-      // Return the selected passenger select page object
-      return new PassengerSelectPage(this.page);
+
+      if (result === 'passenger-select') {
+        return new PassengerSelectPage(this.page);
+      }
+
+      return this;
+
     } catch (error) {
       console.error('Error during form submission:', error);
       throw error;
@@ -45,7 +53,7 @@ export class CheckinPage {
     await this.page.waitForURL('**/checkin/select', { timeout: 10000 });
     const currentUrl = this.page.url();
     expect(currentUrl).not.toBe('http://localhost:3000/');
-    
+
     return true;
   }
 

@@ -17,23 +17,7 @@ export class PassengerDetailsPage {
     await phoneInput.fill(phone);
   }
 
-  async isAtBoardingPass() {
-    await expect(this.page.getByText('Boarding Pass')).toBeVisible();
-  }
-
-  async verifyPassengerName(firstName: string, lastName: string) {
-    await expect(this.page.getByText(`${firstName} ${lastName}`, { exact: true })).toBeVisible();
-  }
-
-  async verifyFlightNumber(flightNumber: string) {
-    await expect(this.page.getByText(flightNumber)).toBeVisible();
-  }
-
   async continue() {
-    await this.page.getByRole('button', { name: 'Continue' }).click();
-  }
-
-  async back() {
-    await this.page.getByRole('button', { name: 'Back' }).click();
+    await this.page.getByRole('button', { name: /Continue/i }).click();
   }
 }
