@@ -1,10 +1,16 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 
-export type CheckinPayload = { lastName: string; bookingRef: string };
+export type CheckinPayload = {
+  lastName: string;
+  bookingRef: string;
+};
 
 type CheckinFormProps = {
-  onSubmit: (payload: CheckinPayload) => void | Promise<void>;
+  onSubmit: (payload: CheckinPayload) => Promise<void> | void;
 };
+
+const MIN_LAST_NAME_LENGTH = 2;
+const MIN_BOOKING_REF_LENGTH = 6;
 
 export default function CheckinForm({ onSubmit }: CheckinFormProps) {
   const [lastName, setLastName] = useState('');
@@ -12,9 +18,11 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const canSubmit = lastName.trim().length > 1 && bookingRef.trim().length >= 6;
+  const canSubmit =
+    lastName.trim().length >= MIN_LAST_NAME_LENGTH &&
+    bookingRef.trim().length >= MIN_BOOKING_REF_LENGTH;
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setError(null);
     if (!canSubmit) {
