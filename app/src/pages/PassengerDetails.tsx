@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { Passenger, PassengerExtraDetails } from '../types/checkin';
 
+// TODO: default country code should be based on user's country
 const COUNTRY_CODES = [
   { code: '+66', country: 'TH', name: 'Thailand', flag: '🇹🇭' },
   { code: '+1', country: 'US', name: 'United States', flag: '🇺🇸' },
