@@ -1,91 +1,47 @@
-import { useState } from 'react';
-import type { Passenger } from '../types/checkin';
+import { useState, useCallback, memo } from 'react';
+import type { PassengerSelectProps } from '../types/passenger';
+import PassengerCard from '../components/PassengerCard';
 
-type PassengerSelectProps = {
-  passengers: Passenger[];
-  onNext: (selected: Passenger[]) => void;
-  onBack: () => void;
-};
-
-export default function PassengerSelect({ passengers, onNext, onBack }: PassengerSelectProps) {
+const PassengerSelect = ({ passengers, onNext, onBack }: PassengerSelectProps) => {
   const [selected, setSelected] = useState<Record<number, boolean>>({});
 
   const anySelected = Object.values(selected).some(Boolean);
   const allSelected = passengers.length > 0 && passengers.every((_, i) => selected[i]);
 
-  const toggleAll = () => {
+  const toggleAll = useCallback(() => {
     if (allSelected) {
       setSelected({});
     } else {
       setSelected(Object.fromEntries(passengers.map((_, i) => [i, true])));
     }
-  };
+  }, [allSelected, passengers.length]);
+
+  const togglePassenger = useCallback((index: number) => {
+    setSelected(prev => ({ ...prev, [index]: !prev[index] }));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    onNext(passengers.filter((_, i) => !!selected[i]));
+  }, [onNext, passengers, selected]);
 
   return (
     <>
       <div className="bg-white rounded-2xl shadow-lg border border-slate-200/80 overflow-hidden mb-4">
-        {/* Header */}
         <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-slate-50/50 to-white border-b border-slate-100">
           <h3 className="text-xl font-bold text-slate-900 tracking-tight">Select Passengers</h3>
           <p className="text-sm text-slate-600 mt-1.5">Choose passengers for check-in</p>
         </div>
 
-        {/* Passenger list - Toggle cards */}
         <div className="p-4 space-y-3">
-          {passengers.map((p, idx) => {
-            const isSelected = !!selected[idx];
-            return (
-              <button
-                key={`${p.firstName}-${p.lastName}-${idx}`}
-                data-testid={`passenger-${idx}`}
-                type="button"
-                onClick={() => setSelected((s) => ({ ...s, [idx]: !s[idx] }))}
-                className={`relative w-full text-left px-4 py-4 rounded-xl border-2 transition-all touch-manipulation overflow-hidden ${isSelected
-                  ? 'border-sky-500 bg-sky-50/50 shadow-sm'
-                  : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm active:scale-[0.99]'
-                  }`}
-              >
-                {/* Corner checkmark badge with animation */}
-                <div className={`absolute top-0 right-0 transition-all duration-300 ${isSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'
-                  }`}>
-                  <div className="relative w-11 h-11">
-                    {/* Triangle background */}
-                    <svg className="w-11 h-11 text-sky-600" viewBox="0 0 44 44" fill="currentColor">
-                      <path d="M44 0 L44 44 L0 0 Z" />
-                    </svg>
-                    {/* Checkmark icon - centered in triangle */}
-                    <svg
-                      className="absolute top-1.5 right-1.5 w-3.5 h-3.5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 min-w-0 pr-6">
-                    <div className={`font-semibold text-base leading-tight transition-colors ${isSelected ? 'text-sky-900' : 'text-slate-900'
-                      }`}>
-                      {p.firstName} {p.lastName}
-                    </div>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${isSelected ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                        {p.paxType}
-                      </span>
-                      <span className={`text-xs ${isSelected ? 'text-sky-700' : 'text-slate-500'}`}>
-                        {p.seat ? `Seat ${p.seat}` : 'No seat assigned'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+          {passengers.map((passenger, index) => (
+            <PassengerCard
+              key={`${passenger.firstName}-${passenger.lastName}-${index}`}
+              passenger={passenger}
+              isSelected={!!selected[index]}
+              onToggle={() => togglePassenger(index)}
+              index={index}
+            />
+          ))}
         </div>
       </div>
 
@@ -131,7 +87,7 @@ export default function PassengerSelect({ passengers, onNext, onBack }: Passenge
           <button
             type="button"
             disabled={!anySelected}
-            onClick={() => onNext(passengers.filter((_, i) => !!selected[i]))}
+            onClick={handleNext}
             className="flex-1 inline-flex items-center justify-center rounded-lg bg-sky-600 text-white px-4 py-3.5 text-base font-semibold hover:bg-sky-700 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed touch-manipulation"
           >
             Continue
@@ -140,4 +96,6 @@ export default function PassengerSelect({ passengers, onNext, onBack }: Passenge
       </div>
     </>
   );
-}
+};
+
+export default memo(PassengerSelect);
