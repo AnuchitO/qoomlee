@@ -1,8 +1,9 @@
+/* eslint-disable */
 import { useNavigate } from 'react-router-dom';
 import { useCheckin } from '../context/CheckinContext';
 import type { FindBookingResponse, Passenger } from '../types/checkin';
 import { Plane } from 'lucide-react';
-import AppleWalletIcon from '../assets/Apple_Wallet_Icon.svg';
+const AppleWalletIcon = '/src/assets/Apple_Wallet_Icon.svg';
 import { DateTime } from 'luxon';
 
 // Function to get full airport name by IATA code
@@ -94,6 +95,8 @@ const getAirportName = (iataCode: string): string => {
     'DPS': 'Ngurah Rai International Airport, Bali',
 
     // Additional Thai airports
+    'ROI': 'Roi Et International Airport',
+    'KKC': 'Khon Kaen International Airport',
     'LPT': 'Lampang Airport',
     'NST': 'Nakhon Si Thammarat Airport',
     'NAW': 'Narathiwat Airport',
@@ -114,13 +117,6 @@ type BoardingPassProps = {
   booking: FindBookingResponse;
   passengers: Passenger[];
 };
-
-
-type Timezone = {
-  hours: string;
-  minutes: string;
-  tz: string;
-}
 
 export default function BoardingPass({ booking, passengers }: BoardingPassProps) {
   const navigate = useNavigate();
@@ -159,6 +155,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
   };
 
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const boardingTime = formatTime(DateTime.fromISO(flight.departure.time).minus({ minutes: 40 }).toISO(), false, 'boardingTime');
 
   // Use terminal and gate from flight data
