@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useCheckin } from '../context/CheckinContext';
-import CheckinForm from '../components/CheckinForm';
+import CheckinForm from '../components/Checkin/CheckinForm';
 import PassengerSelect from './PassengerSelect';
 import PassengerDetails from './PassengerDetails';
 import DangerousGoods from './DangerousGoods';
@@ -8,7 +8,7 @@ import BoardingPass from './BoardingPass';
 import MobileBottomNav from '../components/nav/MobileBottomNav';
 import { useModal } from '../components/ModalProvider';
 import { findBooking, ApiError } from '../services/checkin';
-import type { CheckinPayload } from '../components/CheckinForm';
+import type { CheckinPayload } from '../components/Checkin/CheckinForm';
 import { X } from 'lucide-react';
 import { useMemo } from 'react';
 

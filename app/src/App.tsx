@@ -1,6 +1,6 @@
 import Header from './components/nav/Header';
 import Motto from './components/Motto';
-import CheckinForm, { CheckinPayload } from './components/CheckinForm';
+import CheckinForm, { CheckinPayload } from './components/Checkin/CheckinForm';
 import InfoCards from './components/InfoCards';
 import TravelTipsSidebar from './components/TravelTipsSidebar';
 import Footer from './components/Footer';
