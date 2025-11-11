@@ -1,6 +1,6 @@
 import { useState, useCallback, memo } from 'react';
 import type { PassengerSelectProps } from '../types/passenger';
-import PassengerCard from '../components/PassengerCard';
+import PassengerCard from '../components/Passenger/PassengerCard';
 
 const PassengerSelect = ({ passengers, onNext, onBack }: PassengerSelectProps) => {
   const [selected, setSelected] = useState<Record<number, boolean>>({});

@@ -1,4 +1,4 @@
-import type { PassengerCardProps } from '../types/passenger';
+import type { PassengerCardProps } from '../../types/passenger';
 
 const cardBaseClasses = 'relative w-full text-left px-4 py-4 rounded-xl border-2 transition-all touch-manipulation overflow-hidden';
 const selectedCardClasses = 'border-sky-500 bg-sky-50/50 shadow-sm';
