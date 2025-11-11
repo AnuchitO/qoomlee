@@ -36,10 +36,10 @@ export default function PassengerCard({ passenger, isSelected, onToggle, index }
             {passenger.firstName} {passenger.lastName}
           </div>
           <div className="flex items-center gap-2 mt-2">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${isSelected ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>
+            <span data-testid={`paxType-${index}`} className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${isSelected ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-600'}`}>
               {passenger.paxType}
             </span>
-            <span className={`text-xs ${isSelected ? 'text-sky-700' : 'text-slate-500'}`}>
+            <span data-testid={`seat-${index}`} className={`text-xs ${isSelected ? 'text-sky-700' : 'text-slate-500'}`}>
               {passenger.seat ? `Seat ${passenger.seat}` : 'No seat assigned'}
             </span>
           </div>
