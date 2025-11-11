@@ -1,5 +1,11 @@
 # Booking flow
 
+So, if you’re booking with a typical airline:
+
+Booking up to 8 passengers under one PNR is generally safe for “individual” booking rules in many systems.
+
+As soon as you hit 9 or more, you may enter group booking territory (with special rules).
+
 ```mermaid flowchart LR
 
 %% START

@@ -1,5 +1,58 @@
 # Check-in Flow
 
+🧭 Business Rules — PNR & Online Check-in
+1. PNR Creation Rules
+
+BR-01: A single PNR (Passenger Name Record) can contain a maximum of 9 passengers (including adults, children, and infants with seats).
+
+BR-02: For 10 or more passengers, the booking must be processed as a Group Booking under a Group PNR.
+
+BR-03: Each PNR must contain at least one adult passenger if children or infants are included.
+
+BR-04: Each PNR must include unique passenger details (name, DOB, contact info, etc.) for ticket issuance and check-in.
+
+2. Online Check-in Rules
+
+BR-05: All passengers within a single PNR (up to 9 pax) are eligible for online check-in.
+
+BR-06: The online check-in system must allow check-in for the entire PNR or selected passengers within that PNR.
+
+BR-07: For group bookings (10+ pax / group PNR), online check-in is not available through the standard web or mobile process.
+
+BR-08: Group PNRs must be checked in via airport counters or special group check-in desks.
+
+BR-09: Online check-in may be restricted for PNRs containing:
+
+Special service requests (e.g., wheelchair, unaccompanied minor, pets, deportee, etc.)
+
+Unconfirmed ticketing status
+
+Code-share flights operated by partner airlines with no online check-in agreement.
+
+3. System Handling Rules
+
+BR-10: The system should display an appropriate message when a user attempts online check-in for an ineligible PNR (e.g., “Online check-in is not available for group bookings”).
+
+BR-11: For PNRs with mixed eligibility (some passengers restricted), the system should allow partial check-in for eligible passengers.
+
+BR-12: Each passenger checked in online must have a valid e-ticket number and seat assignment (if applicable).
+
+
+User Story
+As a passenger,
+I want to check in online for my booking (up to 9 passengers),
+So that I can obtain boarding passes before arriving at the airport.
+
+Acceptance Criteria:
+
+Given a PNR with ≤ 9 passengers and confirmed tickets,
+When the user accesses online check-in,
+Then the system allows check-in for all or selected passengers.
+
+Given a PNR with ≥ 10 passengers (Group Booking),
+When the user attempts online check-in,
+Then the system displays a message: “Online check-in not available for group bookings. Please check in at the airport.”
+
 ```mermaid
 flowchart LR
 
