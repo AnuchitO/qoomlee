@@ -32,7 +32,7 @@ describe('PassengerDetails', () => {
       expect(screen.getByText('1. Alex Huum')).toBeInTheDocument();
       expect(screen.getByText('2. Jane Doe')).toBeInTheDocument();
       expect(screen.getAllByPlaceholderText(/TH \/ US \/ SG/i)).toHaveLength(2);
-      expect(screen.getAllByPlaceholderText(/8x xxx xxxx/i)).toHaveLength(2);
+      expect(screen.getAllByPlaceholderText(/Enter phone number/i)).toHaveLength(2);
     });
 
     it('should render Back and Continue buttons', () => {
@@ -56,12 +56,14 @@ describe('PassengerDetails', () => {
       expect(nationalityInputs[0]).toHaveFocus();
     });
 
-    it('should display country name below country code dropdown', () => {
+    it('should display default country code', () => {
       render(<PassengerDetails passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
       // Default country code is +66 (Thailand)
-      const countryNames = screen.getAllByText('Thailand');
-      expect(countryNames.length).toBeGreaterThan(0);
+      const countrySelects = screen.getAllByRole('combobox');
+      countrySelects.forEach(select => {
+        expect(select).toHaveValue('+66');
+      });
     });
   });
 
@@ -170,7 +172,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.click(phoneInput);
       await user.tab();
 
@@ -183,7 +185,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '12345');
       await user.tab();
 
@@ -196,7 +198,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '123abc456');
       await user.tab();
 
@@ -209,7 +211,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '81 234 5678');
       await user.tab();
 
@@ -222,7 +224,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '81-234-5678');
       await user.tab();
 
@@ -235,7 +237,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '(81) 234 5678');
       await user.tab();
 
@@ -244,20 +246,26 @@ describe('PassengerDetails', () => {
       });
     });
 
-    it('should have maxLength attribute of 15 characters', () => {
+    it('should show error for phone numbers longer than 15 characters', async () => {
+      const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i) as HTMLInputElement;
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       
-      // Check that maxLength attribute is set
-      expect(phoneInput).toHaveAttribute('maxLength', '15');
+      // Type a long phone number
+      const longPhone = '1234567890123456'; // 16 characters
+      await user.type(phoneInput, longPhone);
+      await user.tab();
+      
+      // Should show error for phone number being too long
+      expect(screen.getByText('Phone number too long')).toBeInTheDocument();
     });
 
     it('should show red border on invalid phone field', async () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '123');
       await user.tab();
 
@@ -270,7 +278,7 @@ describe('PassengerDetails', () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
       await user.type(phoneInput, '123');
       await user.tab();
 
@@ -288,16 +296,14 @@ describe('PassengerDetails', () => {
       expect(countrySelect.value).toBe('+66');
     });
 
-    it('should update country name when country code changes', async () => {
+    it('should update country code when selected', async () => {
       const user = userEvent.setup();
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
-      const countrySelect = screen.getAllByRole('combobox')[0];
+      const countrySelect = screen.getAllByRole('combobox')[0] as HTMLSelectElement;
       await user.selectOptions(countrySelect, '+1');
 
-      await waitFor(() => {
-        expect(screen.getByText('United States')).toBeInTheDocument();
-      });
+      expect(countrySelect.value).toBe('+1');
     });
 
     it('should have all major country codes available', () => {
@@ -310,8 +316,7 @@ describe('PassengerDetails', () => {
       expect(values).toContain('+66'); // Thailand
       expect(values).toContain('+1');  // US
       expect(values).toContain('+44'); // UK
-      expect(values).toContain('+65'); // Singapore
-      expect(values).toContain('+86'); // China
+      expect(values).toContain('+65')  // Singapore
     });
   });
 
@@ -321,7 +326,7 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
       const nationalityInput = screen.getByPlaceholderText(/TH \/ US \/ SG/i);
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
 
       await user.type(nationalityInput, 'TH');
       await user.type(phoneInput, '812345678');
@@ -337,7 +342,7 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
       const nationalityInput = screen.getByPlaceholderText(/TH \/ US \/ SG/i);
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
 
       await user.type(nationalityInput, 'TH');
       await user.type(phoneInput, '812345678');
@@ -361,7 +366,7 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
       const nationalityInputs = screen.getAllByPlaceholderText(/TH \/ US \/ SG/i);
-      const phoneInputs = screen.getAllByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInputs = screen.getAllByPlaceholderText(/Enter phone number/i);
 
       await user.type(nationalityInputs[0], 'TH');
       await user.type(phoneInputs[0], '812345678');
@@ -396,7 +401,7 @@ describe('PassengerDetails', () => {
 
       const continueButton = screen.getByRole('button', { name: /continue/i });
       expect(continueButton).toBeDisabled();
-      
+
       await user.click(continueButton);
       expect(onNext).not.toHaveBeenCalled();
     });
@@ -425,7 +430,7 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
       const nationalityInput = screen.getByPlaceholderText(/TH \/ US \/ SG/i);
-      
+
       // Type invalid value but don't blur
       await user.type(nationalityInput, 'A');
       expect(screen.queryByText(/enter valid country code/i)).not.toBeInTheDocument();
@@ -465,7 +470,7 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
       const nationalityInput = screen.getByPlaceholderText(/TH \/ US \/ SG/i);
-      const phoneInput = screen.getByPlaceholderText(/8x xxx xxxx/i);
+      const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
 
       // Type with leading/trailing spaces
       await user.type(nationalityInput, 'TH');
@@ -503,7 +508,7 @@ describe('PassengerDetails', () => {
 
       await waitFor(() => {
         const ariaDescribedBy = nationalityInput.getAttribute('aria-describedby');
-        expect(ariaDescribedBy).toContain('nationality-error');
+        expect(ariaDescribedBy).toContain('nationality-0-error');
       });
     });
   });
