@@ -1,14 +1,14 @@
 import { createContext, useContext, useMemo, useState } from 'react';
-import type { FindBookingResponse, Passenger, PassengerExtraDetails } from '../types/checkin';
+import type { Booking, Passenger, PassengerExtraDetails } from '../types/checkin';
 
 export type CheckinState = {
-  booking: FindBookingResponse | null;
+  booking: Booking | null;
   selectedPassengers: Passenger[];
   details: Record<string, PassengerExtraDetails>;
 };
 
 type Ctx = CheckinState & {
-  setBooking: (b: FindBookingResponse | null) => void;
+  setBooking: (b: Booking | null) => void;
   setSelectedPassengers: (p: Passenger[]) => void;
   setDetails: (d: Record<string, PassengerExtraDetails>) => void;
   reset: () => void;
@@ -17,7 +17,7 @@ type Ctx = CheckinState & {
 const CheckinContext = createContext<Ctx | undefined>(undefined);
 
 export function CheckinProvider({ children }: { children: React.ReactNode }) {
-  const [booking, setBooking] = useState<FindBookingResponse | null>(null);
+  const [booking, setBooking] = useState<Booking | null>(null);
   const [selectedPassengers, setSelectedPassengers] = useState<Passenger[]>([]);
   const [details, setDetails] = useState<Record<string, PassengerExtraDetails>>({});
 

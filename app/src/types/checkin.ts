@@ -1,13 +1,13 @@
 export type JourneySegment = {
   flightNumber: string;
-  departure: { 
-    airport: string; 
-    time: string; 
+  departure: {
+    airport: string;
+    time: string;
     terminal?: string;
   };
-  arrival: { 
-    airport: string; 
-    time: string; 
+  arrival: {
+    airport: string;
+    time: string;
     terminal?: string;
   };
   segmentStatus: 'SCHEDULED' | 'CHECKIN_OPEN' | 'CLOSED';
@@ -33,7 +33,7 @@ export type Passenger = {
   checkedIn: boolean;
 };
 
-export type FindBookingResponse = {
+export type Booking = {
   checkinKey: string;
   isEligible: boolean;
   bookingRef: string;

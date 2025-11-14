@@ -1,8 +1,18 @@
-import type { PassengerCardProps } from '../../types/passenger';
+import { Passenger } from "../../types/checkin";
 
 const cardBaseClasses = 'relative w-full text-left px-4 py-4 rounded-xl border-2 transition-all touch-manipulation overflow-hidden';
 const selectedCardClasses = 'border-sky-500 bg-sky-50/50 shadow-sm';
 const unselectedCardClasses = 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm active:scale-[0.99]';
+
+
+export interface PassengerCardProps {
+  passenger: Passenger;
+  isSelected: boolean;
+  onToggle: () => void;
+  index: number;
+}
+
+
 
 export default function PassengerCard({ passenger, isSelected, onToggle, index }: PassengerCardProps) {
   return (

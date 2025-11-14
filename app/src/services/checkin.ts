@@ -1,5 +1,5 @@
 import type { CheckinPayload } from '../components/CheckinForm';
-import type { FindBookingResponse } from '../types/checkin';
+import type { Booking } from '../types/checkin';
 import { PaxType } from '../types/checkin';
 
 export class ApiError extends Error {
@@ -18,7 +18,7 @@ export class ApiError extends Error {
   }
 }
 
-export function findBooking(payload: CheckinPayload): Promise<FindBookingResponse> {
+export function findBooking(payload: CheckinPayload): Promise<Booking> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       if (payload.bookingRef === 'ABC123' && payload.lastName === 'HUUM') {
