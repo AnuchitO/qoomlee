@@ -98,15 +98,10 @@ const mockDb: Record<string, BookingDetails> = {
   }
 };
 
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 // API Service
 export const checkinApi = {
   // Initial check-in with PNR and Surname
   async startCheckin(bookingRef: string, lastName: string): Promise<BookingDetails> {
-    await delay(300);
-
     const booking = mockDb[bookingRef];
     if (!booking || !booking.passengers.some(p => p.lastName === lastName)) {
       throw new ApiError({
@@ -133,36 +128,56 @@ export const checkinApi = {
     };
   },
 
-  // Update passenger details
+  /**
+   * Update details for one or more passengers
+   * @param bookingRef - The booking reference
+   * @param updates - Array of objects containing passenger ID and their details to update
+   * @returns Array of updated passengers
+   */
   async updatePassengerDetails(
     bookingRef: string,
-    passengerId: string,
-    details: {
+    updates: Array<{
+      passengerId: string;
       phoneNumber: string;
       nationality: string;
       documentNumber?: string;
-    }
-  ): Promise<Passenger> {
-    await delay(300);
+    }>
+  ): Promise<Passenger[]> {
 
     const booking = mockDb[bookingRef];
     if (!booking) {
       throw new Error('Booking not found');
     }
 
-    const passenger = booking.passengers.find(p => p.id === passengerId);
-    if (!passenger) {
-      throw new Error('Passenger not found');
+    if (!Array.isArray(updates) || updates.length === 0) {
+      throw new Error('No update data provided');
     }
 
-    // Update passenger details
-    Object.assign(passenger, details);
-    return passenger;
+    const updatedPassengers: Passenger[] = [];
+    const passengerMap = new Map(booking.passengers.map(p => [p.id, p]));
+
+    for (const update of updates) {
+      const passenger = passengerMap.get(update.passengerId);
+      if (passenger) {
+        // Only update the specified fields
+        passenger.phoneNumber = update.phoneNumber;
+        passenger.nationality = update.nationality;
+        if (update.documentNumber !== undefined) {
+          passenger.documentNumber = update.documentNumber;
+        }
+        updatedPassengers.push(passenger);
+      }
+    }
+
+    if (updatedPassengers.length === 0) {
+      throw new Error('No matching passengers found for the provided IDs');
+    }
+
+    return updatedPassengers;
   },
 
   // Acknowledge dangerous goods
   async acknowledgeDangerousGoods(bookingRef: string): Promise<void> {
-    await delay(200);
     const booking = mockDb[bookingRef];
     if (booking) {
       booking.dgAcknowledged = true;
@@ -171,7 +186,6 @@ export const checkinApi = {
 
   // Complete check-in and get boarding pass
   async completeCheckin(bookingRef: string, passengerIds: string[]): Promise<BookingDetails> {
-    await delay(500);
 
     const booking = mockDb[bookingRef];
     if (!booking) {

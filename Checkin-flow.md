@@ -53,6 +53,12 @@ Given a PNR with ≥ 10 passengers (Group Booking),
 When the user attempts online check-in,
 Then the system displays a message: “Online check-in not available for group bookings. Please check in at the airport.”
 
+
+- remember the Select passenger when click back. (if this not in Acceptance criteria it just no need to handle)
+- not allow INFANT checkin online in PNR.
+- not allow CHD travel alone on some journey
+- phone number should allow only number not charecters
+
 ```mermaid
 flowchart LR
 

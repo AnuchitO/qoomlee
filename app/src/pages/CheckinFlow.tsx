@@ -84,33 +84,125 @@ export const CheckinFlow = () => {
   }, [navigate, setSelectedPassengers]);
 
   const handlePassengerDetailsSubmit = useCallback(async (details: Record<string, PassengerExtraDetails>) => {
-    if (!booking) return;
+    if (!booking) {
+      console.error('No booking found');
+      return;
+    }
     
     try {
-      // Update passenger details in the API
-      const updates = selectedPassengers
-        .filter(passenger => details[`${passenger.firstName}-${passenger.lastName}`])
-        .map(passenger => {
-          const detail = details[`${passenger.firstName}-${passenger.lastName}`];
-          return checkinApi.updatePassengerDetails(booking.bookingRef, passenger.id, {
-            phoneNumber: detail.phone,
-            nationality: detail.nationality,
-            documentNumber: detail.countryCode
+      // Debug: Log selectedPassengers and details
+      console.group('Passenger Details Update');
+      console.log('Selected passengers:', selectedPassengers.map(p => ({
+        id: p.id,
+        name: `${p.firstName} ${p.lastName}`,
+        hasId: !!p.id
+      })));
+      console.log('Details keys:', Object.keys(details));
+      console.log('Details values:', details);
+
+      // Define the type for passenger updates
+      type PassengerUpdate = {
+        passengerId: string;
+        detail: PassengerExtraDetails;
+      };
+
+      // Get all passengers with their respective details
+      const updates = selectedPassengers.reduce<PassengerUpdate[]>((acc, passenger) => {
+        const fullName = `${passenger.firstName}-${passenger.lastName}`.toLowerCase();
+        console.log(`Processing passenger: ${fullName} (ID: ${passenger.id})`);
+        
+        // Try to find matching detail (case-insensitive)
+        const [detailKey, detail] = Object.entries(details).find(([key]) => 
+          key.toLowerCase() === fullName
+        ) || [];
+        
+        if (detail) {
+          console.log(`Found details for ${fullName} (key: ${detailKey})`);
+          if (!passenger.id) {
+            console.error(`Missing ID for passenger: ${fullName}`, passenger);
+          }
+          acc.push({
+            passengerId: passenger.id,
+            detail
           });
-        });
-      
-      await Promise.all(updates);
-      
-      // Convert name-based details to ID-based details for state
-      const idBasedDetails = selectedPassengers.reduce((acc, passenger) => {
-        const nameKey = `${passenger.firstName}-${passenger.lastName}`;
-        if (details[nameKey]) {
-          acc[passenger.id] = details[nameKey];
+        } else {
+          console.warn(`No details found for passenger: ${fullName}`);
         }
         return acc;
-      }, {} as Record<string, PassengerExtraDetails>);
+      }, []);
+
+      // Debug: Log the updates in detail
+      console.group('Prepared Updates');
+      updates.forEach((update, index) => {
+        console.log(`Update ${index + 1}:`, {
+          passengerId: update.passengerId,
+          hasPassengerId: !!update.passengerId,
+          detailKeys: Object.keys(update.detail || {})
+        });
+      });
+      console.groupEnd();
+
+      if (updates.length === 0) {
+        throw new Error('No valid passenger details provided');
+      }
+
+      // Prepare updates for the API
+      const passengerUpdates = updates.map(({ passengerId, detail }) => {
+        if (!passengerId) {
+          console.error('Undefined passengerId for detail:', detail);
+          throw new Error('Invalid passenger ID');
+        }
+        return {
+          passengerId,
+          phoneNumber: detail.phone || '',
+          nationality: detail.nationality || '',
+          documentNumber: detail.countryCode
+        };
+      });
+
+      // Debug: Log the API request
+      console.group('API Request');
+      console.log('Booking Ref:', booking.bookingRef);
+      console.log('Passenger Updates:', passengerUpdates);
+      passengerUpdates.forEach((update, index) => {
+        console.log(`Update ${index + 1}:`, {
+          hasPassengerId: !!update.passengerId,
+          ...update
+        });
+      });
+      console.groupEnd();
+
+      // Send all updates in a single API call
+      await checkinApi.updatePassengerDetails(booking.bookingRef, passengerUpdates);
       
-      setDetails(idBasedDetails);
+      // Update local state with the new details
+      const idBasedDetails = updates.reduce<Record<string, PassengerExtraDetails>>((acc, { passengerId, detail }) => {
+        if (passengerId) { // Additional safety check
+          acc[passengerId] = detail;
+        }
+        return acc;
+      }, {});
+      
+      console.log('Updating state with ID-based details:', Object.keys(idBasedDetails));
+      
+      // Ensure all passenger IDs are defined before updating state
+      const validUpdates = Object.entries(idBasedDetails).filter(([id]) => {
+        const isValid = !!id;
+        if (!isValid) {
+          console.error('Attempted to update with invalid passenger ID');
+        }
+        return isValid;
+      });
+      
+      const validIdBasedDetails = Object.fromEntries(validUpdates);
+      
+      setDetails((prevDetails: Record<string, PassengerExtraDetails>) => ({
+        ...prevDetails,
+        ...validIdBasedDetails
+      }));
+      
+      console.log('State update complete');
+      console.groupEnd(); // End the debug group
       navigate('/checkin/dg');
     } catch (error) {
       console.error('Failed to update passenger details:', error);
