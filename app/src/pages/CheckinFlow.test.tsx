@@ -5,12 +5,17 @@ import { MemoryRouter } from 'react-router-dom';
 import { CheckinFlow } from './CheckinFlow';
 import { CheckinProvider } from '../context/CheckinContext';
 import { ModalProvider } from '../components/ModalProvider';
-import { findBooking } from '../services/checkin';
+import { checkinApi } from '../services/checkinApi';
 import { PaxType } from '../types/checkin';
 
 // Mock the services
-vi.mock('../services/checkin', () => ({
-  findBooking: vi.fn(),
+vi.mock('../services/checkinApi', () => ({
+  checkinApi: {
+    startCheckin: vi.fn(),
+    updatePassengerDetails: vi.fn().mockResolvedValue({}),
+    acknowledgeDangerousGoods: vi.fn().mockResolvedValue({}),
+    completeCheckin: vi.fn()
+  },
   ApiError: class ApiError extends Error {
     constructor(message: string) {
       super(message);
@@ -38,49 +43,61 @@ describe('CheckinFlow', () => {
 
 
   it('submits booking and navigates to passenger select', async () => {
-    const user = userEvent.setup();
+    // Mock the API response
     const mockBooking = {
       checkinKey: 'test-key-123',
       isEligible: true,
       bookingRef: 'ABC123',
       passengers: [
-        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
-        { firstName: 'John', lastName: 'Smith', paxType: PaxType.ADT, seat: '12B', checkedIn: false },
+        { id: '123e4567-e89b-12d3-a456-426614174000', firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+        { id: '123e4567-e89b-12d3-a456-426614174001', firstName: 'John', lastName: 'Smith', paxType: PaxType.ADT, seat: '12B', checkedIn: false },
       ],
       journeys: [
         {
           flightNumber: 'QM123',
-          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
-          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          departure: {
+            airport: 'BKK',
+            time: '2024-01-01T10:00:00Z',
+            terminal: '1'
+          },
+          arrival: {
+            airport: 'SIN',
+            time: '2024-01-01T13:00:00Z',
+            terminal: '3'
+          },
           segmentStatus: 'CHECKIN_OPEN' as const,
           marketingCarrier: 'QM',
           operatingCarrier: 'QM',
+          terminal: '1',
+          gate: 'A1'
         },
       ],
     };
 
-    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+    // Setup the mock implementation
+    const mockStartCheckin = vi.spyOn(checkinApi, 'startCheckin').mockResolvedValue(mockBooking);
 
+    // Render the component
     renderWithProviders('/checkin/start');
+    const user = userEvent.setup();
 
-    const lastNameInput = screen.getByLabelText(/last name/i);
-    const bookingRefInput = screen.getByLabelText(/booking reference/i);
-    const submitButton = screen.getByRole('button', { name: /retrieve booking/i });
+    // Fill out the form
+    await user.type(screen.getByLabelText(/last name/i), 'Huum');
+    await user.type(screen.getByLabelText(/booking reference/i), 'ABC123');
 
-    await user.type(lastNameInput, 'Huum');
-    await user.type(bookingRefInput, 'ABC123');
-    await user.click(submitButton);
+    // Submit the form
+    await user.click(screen.getByRole('button', { name: /retrieve booking/i }));
 
-    await waitFor(() => {
-      expect(findBooking).toHaveBeenCalledWith({
-        lastName: 'HUUM',
-        bookingRef: 'ABC123',
-      });
-    });
+    // Verify the API was called with the correct arguments (last name is converted to uppercase)
+    expect(mockStartCheckin).toHaveBeenCalledWith('ABC123', 'HUUM');
 
+    // Verify navigation to passenger select
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /select passengers/i })).toBeInTheDocument();
     });
+
+    // Clean up
+    mockStartCheckin.mockRestore();
   });
 
   it('renders check-in header with cancel button', () => {
@@ -108,7 +125,7 @@ describe('CheckinFlow', () => {
     const user = userEvent.setup();
     const errorMessage = 'Booking not found';
 
-    vi.mocked(findBooking).mockRejectedValueOnce(new Error(errorMessage));
+    vi.mocked(checkinApi.startCheckin).mockRejectedValueOnce(new Error(errorMessage));
 
     renderWithProviders('/checkin/start');
 
@@ -132,7 +149,7 @@ describe('CheckinFlow', () => {
 
     const apiError = new Error(errorMessage);
     apiError.name = 'ApiError';
-    vi.mocked(findBooking).mockRejectedValueOnce(apiError);
+    vi.mocked(checkinApi.startCheckin).mockRejectedValueOnce(apiError);
 
     renderWithProviders('/checkin/start');
 
@@ -215,16 +232,27 @@ describe('CheckinFlow', () => {
       journeys: [
         {
           flightNumber: 'QM123',
-          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
-          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          departure: {
+            airport: 'BKK',
+            time: '2024-01-01T10:00:00Z',
+            terminal: '1'
+          },
+          arrival: {
+            airport: 'SIN',
+            time: '2024-01-01T13:00:00Z',
+            terminal: '3'
+          },
           segmentStatus: 'CHECKIN_OPEN' as const,
           marketingCarrier: 'QM',
           operatingCarrier: 'QM',
+          terminal: '1',
+          gate: 'A1'
         },
       ],
     };
 
-    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+    // Mock the startCheckin function to resolve with our mock booking
+    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 
@@ -258,16 +286,27 @@ describe('CheckinFlow', () => {
       journeys: [
         {
           flightNumber: 'QM123',
-          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
-          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          departure: {
+            airport: 'BKK',
+            time: '2024-01-01T10:00:00Z',
+            terminal: '1'
+          },
+          arrival: {
+            airport: 'SIN',
+            time: '2024-01-01T13:00:00Z',
+            terminal: '3'
+          },
           segmentStatus: 'CHECKIN_OPEN' as const,
           marketingCarrier: 'QM',
           operatingCarrier: 'QM',
+          terminal: '1',
+          gate: 'A1'
         },
       ],
     };
 
-    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+    // Mock the startCheckin function to resolve with our mock booking
+    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 
@@ -313,16 +352,27 @@ describe('CheckinFlow', () => {
       journeys: [
         {
           flightNumber: 'QM123',
-          departure: { airport: 'BKK', time: '2024-01-01T10:00:00Z' },
-          arrival: { airport: 'SIN', time: '2024-01-01T13:00:00Z' },
+          departure: {
+            airport: 'BKK',
+            time: '2024-01-01T10:00:00Z',
+            terminal: '1'
+          },
+          arrival: {
+            airport: 'SIN',
+            time: '2024-01-01T13:00:00Z',
+            terminal: '3'
+          },
           segmentStatus: 'CHECKIN_OPEN' as const,
           marketingCarrier: 'QM',
           operatingCarrier: 'QM',
+          terminal: '1',
+          gate: 'A1'
         },
       ],
     };
 
-    vi.mocked(findBooking).mockResolvedValueOnce(mockBooking);
+    // Mock the startCheckin function to resolve with our mock booking
+    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 

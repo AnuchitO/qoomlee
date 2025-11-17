@@ -24,6 +24,7 @@ export enum PaxType {
 }
 
 export type Passenger = {
+  id: string;
   firstName: string;
   lastName: string;
   paxType: PaxType;

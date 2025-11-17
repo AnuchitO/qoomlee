@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { useCheckin } from '../context/CheckinContext';3
+import { useCheckin } from '../context/CheckinContext';
 import CheckinForm from '../components/Checkin/CheckinForm';
 import PassengerSelect from './PassengerSelect';
 import PassengerDetails from './PassengerDetails';
@@ -7,10 +7,11 @@ import DangerousGoods from './DangerousGoods';
 import BoardingPass from './BoardingPass';
 import MobileBottomNav from '../components/nav/MobileBottomNav';
 import { useModal } from '../components/ModalProvider';
-import { findBooking, ApiError } from '../services/checkin';
+import { checkinApi } from '../services/checkinApi';
 import type { CheckinPayload } from '../components/Checkin/CheckinForm';
 import { X } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useCallback } from 'react';
+import type { JourneySegment, Passenger, PassengerExtraDetails } from '../types/checkin';
 
 const STEPS = [
   { path: '/checkin/start', title: 'Find Booking', step: 1 },
@@ -26,7 +27,7 @@ export const CheckinFlow = () => {
   const { openModal, closeModal } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
-  const { booking, setBooking, selectedPassengers, setSelectedPassengers, reset } = useCheckin();
+  const { booking, setBooking, selectedPassengers, setSelectedPassengers, details, setDetails, reset } = useCheckin();
 
   const currentStepInfo = useMemo(() => {
     const stepInfo = STEPS.find(s => s.path === location.pathname);
@@ -37,16 +38,31 @@ export const CheckinFlow = () => {
     return (currentStepInfo.step / TOTAL_STEPS) * 100;
   }, [currentStepInfo.step]);
 
-  const handleCheckinSubmit = async (payload: CheckinPayload) => {
+  const handleCheckinSubmit = useCallback(async (payload: CheckinPayload) => {
     try {
-      const result = await findBooking(payload);
-      setBooking(result);
+      const result = await checkinApi.startCheckin(payload.bookingRef, payload.lastName);
+      
+      // Map the API response to match the expected Booking type
+      const mappedBooking = {
+        ...result,
+        journeys: result.journeys.map(journey => ({
+          ...journey,
+          segmentStatus: journey.segmentStatus as JourneySegment['segmentStatus']
+        })),
+        passengers: result.passengers.map(p => ({
+          ...p,
+          checkedIn: p.checkedIn || false,
+          seat: p.seat || '',
+          boardingZone: p.boardingZone || '',
+          boardingSequence: p.boardingSequence || ''
+        }))
+      };
+      
+      setBooking(mappedBooking);
       navigate('/checkin/select');
     } catch (err) {
       let userMessage = 'An unexpected error occurred. Please try again.';
-      if (err instanceof ApiError) {
-        userMessage = err.message;
-      } else if (err instanceof Error) {
+      if (err instanceof Error) {
         userMessage = err.message;
       }
       openModal({
@@ -55,10 +71,61 @@ export const CheckinFlow = () => {
       });
       return;
     }
-  };
+  }, [setBooking, navigate, openModal]);
 
-  const handleCancel = () => {
+  const handlePassengerSelect = useCallback((passengers: Passenger[]) => {
+    setSelectedPassengers(passengers);
+    // If no passengers need details, skip to DG page
+    if (passengers.every(p => p.paxType === 'INF')) {
+      navigate('/checkin/dg');
+    } else {
+      navigate('/checkin/details');
+    }
+  }, [navigate, setSelectedPassengers]);
 
+  const handlePassengerDetailsSubmit = useCallback(async (details: Record<string, PassengerExtraDetails>) => {
+    if (!booking) return;
+    
+    try {
+      // Update passenger details in the API
+      const updates = selectedPassengers
+        .filter(passenger => details[`${passenger.firstName}-${passenger.lastName}`])
+        .map(passenger => {
+          const detail = details[`${passenger.firstName}-${passenger.lastName}`];
+          return checkinApi.updatePassengerDetails(booking.bookingRef, passenger.id, {
+            phoneNumber: detail.phone,
+            nationality: detail.nationality,
+            documentNumber: detail.countryCode
+          });
+        });
+      
+      await Promise.all(updates);
+      
+      // Convert name-based details to ID-based details for state
+      const idBasedDetails = selectedPassengers.reduce((acc, passenger) => {
+        const nameKey = `${passenger.firstName}-${passenger.lastName}`;
+        if (details[nameKey]) {
+          acc[passenger.id] = details[nameKey];
+        }
+        return acc;
+      }, {} as Record<string, PassengerExtraDetails>);
+      
+      setDetails(idBasedDetails);
+      navigate('/checkin/dg');
+    } catch (error) {
+      console.error('Failed to update passenger details:', error);
+      openModal({
+        title: 'Update Failed',
+        message: 'Failed to save passenger details. Please try again.'
+      });
+    }
+  }, [booking, navigate, openModal, setDetails]);
+
+  const handleDGAcknowledge = useCallback(() => {
+    navigate('/checkin/boarding');
+  }, [navigate]);
+
+  const handleCancel = useCallback(() => {
     openModal({
       title: 'Cancel Check-in?',
       message: 'Your progress will be lost. Are you sure you want to cancel?',
@@ -80,7 +147,22 @@ export const CheckinFlow = () => {
         </div>
       ),
     });
-  };
+  }, [openModal, closeModal, reset, navigate]);
+
+  const passengerSelectHandlers = useMemo(() => ({
+    onNext: handlePassengerSelect,
+    onBack: () => navigate('/checkin/start')
+  }), [handlePassengerSelect, navigate]);
+
+  const passengerDetailsHandlers = useMemo(() => ({
+    onNext: handlePassengerDetailsSubmit,
+    onBack: () => navigate('/checkin/select')
+  }), [handlePassengerDetailsSubmit, navigate]);
+
+  const dangerousGoodsHandlers = useMemo(() => ({
+    onAccept: handleDGAcknowledge,
+    onBack: () => navigate('/checkin/details')
+  }), [handleDGAcknowledge, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 via-white to-sky-50 flex flex-col">
@@ -156,11 +238,7 @@ export const CheckinFlow = () => {
                 booking ? (
                   <PassengerSelect
                     passengers={booking.passengers}
-                    onNext={(sel) => {
-                      setSelectedPassengers(sel);
-                      navigate('/checkin/details');
-                    }}
-                    onBack={() => navigate('/checkin/start')}
+                    {...passengerSelectHandlers}
                   />
                 ) : (
                   <Navigate to="/checkin/start" replace />
@@ -173,11 +251,7 @@ export const CheckinFlow = () => {
                 booking && selectedPassengers.length > 0 ? (
                   <PassengerDetails
                     passengers={selectedPassengers}
-                    onNext={(_details) => {
-                      // could persist details in context
-                      navigate('/checkin/dg');
-                    }}
-                    onBack={() => navigate('/checkin/select')}
+                    {...passengerDetailsHandlers}
                   />
                 ) : (
                   <Navigate to="/checkin/select" replace />
@@ -188,7 +262,7 @@ export const CheckinFlow = () => {
               path="/checkin/dg"
               element={
                 booking && selectedPassengers.length > 0 ? (
-                  <DangerousGoods onAccept={() => navigate('/checkin/boarding')} onBack={() => navigate('/checkin/details')} />
+                  <DangerousGoods {...dangerousGoodsHandlers} />
                 ) : (
                   <Navigate to="/checkin/select" replace />
                 )
