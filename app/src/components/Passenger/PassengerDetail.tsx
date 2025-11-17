@@ -74,7 +74,7 @@ export const PassengerDetail = ({
               data-testid={`countryCode-${index}`}
               value={detail.countryCode}
               onChange={(e) => onCountryCodeChange(e.target.value)}
-              className="w-28 px-3 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation bg-white cursor-pointer border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
+              className="w-full px-3 py-3.5 text-base rounded-lg border-2 outline-none touch-manipulation bg-white cursor-pointer border-slate-300 focus:border-sky-500 focus:ring-2 focus:ring-sky-200"
             >
               {COUNTRY_CODES.map((cc) => (
                 <option key={cc.code} value={cc.code}>
@@ -82,6 +82,9 @@ export const PassengerDetail = ({
                 </option>
               ))}
             </select>
+            <p className="text-xs text-slate-500 mt-1.5 ml-1.5">
+              {COUNTRY_CODES.find((cc) => cc.code === detail.countryCode)?.name || ''}
+            </p>
           </div>
           <div className="flex-1">
             <input
@@ -99,13 +102,14 @@ export const PassengerDetail = ({
               aria-invalid={!!phoneError}
               aria-describedby={phoneError ? `phone-${index}-error` : undefined}
             />
+
+            {phoneError && (
+              <p id={`phone-${index}-error`} className="text-xs text-red-600 mt-1.5 ml-1.5">
+                {phoneError}
+              </p>
+            )}
           </div>
         </div>
-        {phoneError && (
-          <p id={`phone-${index}-error`} className="text-xs text-red-600 mt-1.5 ml-1.5">
-            {phoneError}
-          </p>
-        )}
       </div>
     </div>
   </div>
