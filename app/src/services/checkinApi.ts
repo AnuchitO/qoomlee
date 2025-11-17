@@ -81,7 +81,7 @@ const mockDb: Record<string, BookingDetails> = {
         paxType: PaxType.ADT,
         seat: '12A',
         boardingZone: '1',
-        boardingSequence: '012',
+        boardingSequence: '023',
         checkedIn: true,
       },
       {
@@ -91,7 +91,7 @@ const mockDb: Record<string, BookingDetails> = {
         paxType: PaxType.ADT,
         seat: '12B',
         boardingZone: '1',
-        boardingSequence: '013',
+        boardingSequence: '022',
         checkedIn: true,
       }
     ]
@@ -107,7 +107,7 @@ export const checkinApi = {
       throw new ApiError({
         code: 'BOOKING_NOT_FOUND',
         status: 404,
-        message: 'Booking not found',
+        message: 'Unable to retrieve booking',
         userMessage: 'We couldn\'t find your booking. Check your details and try again.',
       });
     }
@@ -146,7 +146,7 @@ export const checkinApi = {
 
     const booking = mockDb[bookingRef];
     if (!booking) {
-      throw new Error('Booking not found');
+      throw new Error('Unable to retrieve booking');
     }
 
     if (!Array.isArray(updates) || updates.length === 0) {
@@ -189,7 +189,7 @@ export const checkinApi = {
 
     const booking = mockDb[bookingRef];
     if (!booking) {
-      throw new Error('Booking not found');
+      throw new Error('Unable to retrieve booking');
     }
 
     // Update check-in status for selected passengers

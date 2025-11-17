@@ -6,10 +6,10 @@ import TravelTipsSidebar from './components/TravelTipsSidebar';
 import Footer from './components/Footer';
 import MobileBottomNav from './components/nav/MobileBottomNav';
 import { useModal } from './components/ModalProvider';
-import { CheckinFlow } from './pages/CheckinFlow';
+import { CheckinFlow, startCheckin } from './pages/CheckinFlow';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCheckin } from './context/CheckinContext';
-import { findBooking, ApiError } from './services/checkin';
+import { useCallback } from 'react';
 
 function App() {
   const { openModal } = useModal();
@@ -17,22 +17,20 @@ function App() {
   const location = useLocation();
   const { setBooking } = useCheckin();
 
-  async function handleCheckinSubmit(payload: CheckinPayload) {
-    try {
-      const res = await findBooking(payload);
-      setBooking(res);
-      navigate('/checkin/select');
-    } catch (err) {
-      const isApiError = err instanceof ApiError;
-      const userMessage = isApiError ? err.userMessage : 'Something went wrong. Please try again later.';
-      openModal({
-        title: 'Unable to retrieve booking',
-        intent: 'error',
-        message: userMessage,
-      });
-      return;
-    }
-  }
+   const handleCheckinSubmit = useCallback(async (payload: CheckinPayload) => {
+    await startCheckin(payload, {
+      onSuccess: (booking) => {
+        setBooking(booking);
+        navigate('/checkin/select');
+      },
+      onError: (error) => {
+        openModal({
+          title: 'Check-in Error',
+          message: error.message,
+        });
+      }
+    });
+  }, [setBooking, navigate, openModal]);
 
   const isCheckin = location.pathname.startsWith('/checkin');
 
