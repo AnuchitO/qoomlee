@@ -1,4 +1,13 @@
 import { useState, FormEvent } from 'react';
+import TestCases from './TestCases';
+
+declare global {
+  interface ImportMeta {
+    env: {
+      DEV: boolean;
+    };
+  }
+}
 
 export type CheckinPayload = {
   lastName: string;
@@ -15,6 +24,7 @@ const MIN_BOOKING_REF_LENGTH = 6;
 export default function CheckinForm({ onSubmit }: CheckinFormProps) {
   const [lastName, setLastName] = useState('');
   const [bookingRef, setBookingRef] = useState('');
+
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -41,7 +51,10 @@ export default function CheckinForm({ onSubmit }: CheckinFormProps) {
 
   return (
     <div id="checkin" className="bg-white rounded-xl sm:rounded-2xl shadow-lg p-5 sm:p-6 md:p-8 border border-sky-100 hover:shadow-xl transition-shadow duration-300">
-      <h3 className="text-xl sm:text-2xl font-bold text-slate-800 mb-5 sm:mb-6">Retrieve Your Booking</h3>
+      <div className="flex justify-between items-center mb-5 sm:mb-6">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-800">Retrieve Your Booking</h3>
+        <TestCases setLastName={setLastName} setBookingRef={setBookingRef} />
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
         <div>
