@@ -1,6 +1,7 @@
 import type { Passenger } from '../types/checkin';
 import { usePassengerForm } from '../hooks/usePassengerForm';
 import { PassengerDetail } from '../components/Passenger/PassengerDetail';
+import { TestCases } from '../components/Passenger/TestCases';
 
 type PassengerDetailsProps = {
   passengers: Passenger[];
@@ -22,8 +23,17 @@ export default function PassengerDetails({ passengers, onNext, onBack }: Passeng
     <>
       <div className="bg-white rounded-2xl shadow-lg border border-slate-200/80 overflow-hidden mb-4">
         <div className="px-5 pt-5 pb-4 bg-gradient-to-b from-slate-50/50 to-white border-b border-slate-100">
-          <h3 className="text-xl font-bold text-slate-900 tracking-tight">Passenger Details</h3>
-          <p className="text-sm text-slate-600 mt-1.5">Enter required information for each passenger</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight">Passenger Details</h3>
+              <p className="text-sm text-slate-600 mt-1.5">Enter required information for each passenger</p>
+            </div>
+            <TestCases 
+              passengers={passengers}
+              getPassengerKey={getPassengerKey}
+              updateDetail={updateDetail}
+            />
+          </div>
         </div>
         <div className="p-5 sm:p-6">
           <div className="space-y-5">
