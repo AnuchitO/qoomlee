@@ -6,8 +6,8 @@ import { Passenger, PaxType } from '../types/checkin';
 
 describe('PassengerDetails', () => {
   const mockPassengers: Passenger[] = [
-    { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
-    { firstName: 'Jane', lastName: 'Doe', paxType: PaxType.ADT, seat: '12B', checkedIn: false },
+    { id: '1', firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+    { id: '2', firstName: 'Jane', lastName: 'Doe', paxType: PaxType.ADT, seat: '12B', checkedIn: false },
   ];
 
   let onNext: ReturnType<typeof vi.fn>;
@@ -251,12 +251,12 @@ describe('PassengerDetails', () => {
       render(<PassengerDetails passengers={[mockPassengers[0]]} onNext={onNext} onBack={onBack} />);
 
       const phoneInput = screen.getByPlaceholderText(/Enter phone number/i);
-      
+
       // Type a long phone number
       const longPhone = '1234567890123456'; // 16 characters
       await user.type(phoneInput, longPhone);
       await user.tab();
-      
+
       // Should show error for phone number being too long
       expect(screen.getByText('Phone number too long')).toBeInTheDocument();
     });
@@ -352,7 +352,7 @@ describe('PassengerDetails', () => {
 
       await waitFor(() => {
         expect(onNext).toHaveBeenCalledWith({
-          'Alex-Huum': {
+          '1': {
             nationality: 'TH',
             phone: '812345678',
             countryCode: '+66',
@@ -378,12 +378,12 @@ describe('PassengerDetails', () => {
 
       await waitFor(() => {
         expect(onNext).toHaveBeenCalledWith({
-          'Alex-Huum': {
+          '1': {
             nationality: 'TH',
             phone: '812345678',
             countryCode: '+66',
           },
-          'Jane-Doe': {
+          '2': {
             nationality: 'US',
             phone: '9876543210',
             countryCode: '+66',
@@ -453,6 +453,7 @@ describe('PassengerDetails', () => {
 
     it('should handle passenger with special characters in name', () => {
       const specialPassenger: Passenger = {
+        id: 'special-1',
         firstName: "O'Brien",
         lastName: 'Smith-Jones',
         paxType: PaxType.ADT,

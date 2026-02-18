@@ -50,7 +50,7 @@ export default function BoardingPass({ booking, passengers }: BoardingPassProps)
 
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const boardingTime = formatTime(DateTime.fromISO(flight.departure.time).minus({ minutes: 40 }).toISO(), false, 'boardingTime');
+  const boardingTime = formatTime(DateTime.fromISO(flight.departure.time).minus({ minutes: 40 }).toISO() || '', false, 'boardingTime');
 
   // Use terminal and gate from flight data
 

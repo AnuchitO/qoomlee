@@ -8,11 +8,11 @@ import BoardingPass from './BoardingPass';
 import MobileBottomNav from '../components/nav/MobileBottomNav';
 import { useModal } from '../components/ModalProvider';
 import { checkinApi } from '../services/checkinApi';
+import { ApiError } from '../services/checkin';
 import type { CheckinPayload } from '../components/Checkin/CheckinForm';
 import { X } from 'lucide-react';
 import { useMemo, useCallback } from 'react';
 import type { JourneySegment, Passenger, PassengerExtraDetails } from '../types/checkin';
-import type { Booking } from '../types/checkin';
 
 
 const STEPS = [
@@ -25,43 +25,11 @@ const STEPS = [
 
 const TOTAL_STEPS = STEPS.length;
 
-export const startCheckin = async (
-  payload: CheckinPayload,
-  callbacks: {
-    onSuccess: (booking: Booking) => void;
-    onError: (error: Error) => void;
-  }
-): Promise<void> => {
-  try {
-    const result = await checkinApi.startCheckin(payload.bookingRef, payload.lastName);
-
-    // Map the API response to match the expected Booking type
-    const mappedBooking: Booking = {
-      ...result,
-      journeys: result.journeys.map(journey => ({
-        ...journey,
-        segmentStatus: journey.segmentStatus as JourneySegment['segmentStatus']
-      })),
-      passengers: result.passengers.map(p => ({
-        ...p,
-        checkedIn: p.checkedIn || false,
-        seat: p.seat || '',
-        boardingZone: p.boardingZone || '',
-        boardingSequence: p.boardingSequence || ''
-      }))
-    };
-
-    callbacks.onSuccess(mappedBooking);
-  } catch (error) {
-    callbacks.onError(error instanceof Error ? error : new Error('An unknown error occurred'));
-  }
-};
-
 export const CheckinFlow = () => {
   const { openModal, closeModal } = useModal();
   const navigate = useNavigate();
   const location = useLocation();
-  const { booking, setBooking, selectedPassengers, setSelectedPassengers, details, setDetails, reset } = useCheckin();
+  const { booking, setBooking, selectedPassengers, setSelectedPassengers, setDetails, reset } = useCheckin();
 
   const currentStepInfo = useMemo(() => {
     const stepInfo = STEPS.find(s => s.path === location.pathname);
@@ -72,20 +40,33 @@ export const CheckinFlow = () => {
     return (currentStepInfo.step / TOTAL_STEPS) * 100;
   }, [currentStepInfo.step]);
 
- const handleCheckinSubmit = useCallback(async (payload: CheckinPayload) => {
-  await startCheckin(payload, {
-    onSuccess: (booking) => {
-      setBooking(booking);
-      navigate('/checkin/select');
-    },
-    onError: (error) => {
-      openModal({
-        title: 'Check-in Error',
-        message: error.message,
+  const showErrorModal = useCallback((title: string, message: string) => {
+    openModal({
+      title,
+      message,
+      intent: 'error',
+      closeLabel: 'OK',
+      icon: <X className="w-6 h-6 text-red-500" />,
+    } as any); // Workaround for icon property if not in types, but ModalProvider has content/message
+  }, [openModal]);
+
+  const handleStartCheckin = useCallback(async (payload: CheckinPayload) => {
+    try {
+      const result = await checkinApi.startCheckin(payload.bookingRef, payload.lastName);
+      setBooking({
+        ...result,
+        journeys: result.journeys.map(journey => ({
+          ...journey,
+          segmentStatus: journey.segmentStatus as JourneySegment['segmentStatus']
+        }))
       });
+      navigate('/checkin/select');
+    } catch (error) {
+      console.error('Check-in start failed:', error);
+      const apiError = error as ApiError;
+      showErrorModal('Check-in Error', apiError.userMessage || apiError.message || 'An unexpected error occurred. Please try again.');
     }
-  });
-}, [setBooking, navigate, openModal]);
+  }, [navigate, setBooking, showErrorModal]);
 
   const handlePassengerSelect = useCallback((passengers: Passenger[]) => {
     setSelectedPassengers(passengers);
@@ -97,72 +78,34 @@ export const CheckinFlow = () => {
     }
   }, [navigate, setSelectedPassengers]);
 
-  const handlePassengerDetailsSubmit = useCallback(async (details: Record<string, PassengerExtraDetails>) => {
-    if (!booking) {
-      console.error('No booking found');
-      return;
-    }
+  const handleUpdatePassengerDetails = useCallback(async (batchDetails: Record<string, PassengerExtraDetails>) => {
+    if (!booking) return;
 
     try {
-      type PassengerUpdate = {
-        passengerId: string;
-        detail: PassengerExtraDetails;
-      };
-
-      const updates = selectedPassengers.reduce<PassengerUpdate[]>((acc, passenger) => {
-        const fullName = `${passenger.firstName}-${passenger.lastName}`.toLowerCase();
-
-        // Try to find matching detail (case-insensitive)
-        const [detailKey, detail] = Object.entries(details).find(([key]) =>
-          key.toLowerCase() === fullName
-        ) || [];
-
-        if (detail) {
-          if (!passenger.id) {
-            console.error(`Missing ID for passenger: ${fullName}`, passenger);
-          }
-          acc.push({
-            passengerId: passenger.id,
-            detail
-          });
-        } else {
-          console.warn(`No details found for passenger: ${fullName}`);
-        }
-        return acc;
-      }, []);
-
-      const passengerUpdates = updates.map(({ passengerId, detail }) => {
-        if (!passengerId) {
-          console.error('Undefined passengerId for detail:', detail);
-          throw new Error('Invalid passenger ID');
-        }
-        return {
-          passengerId,
-          phoneNumber: detail.phone || '',
-          nationality: detail.nationality || '',
-          documentNumber: detail.countryCode
-        };
-      });
-
-      if (passengerUpdates.length === 0) {
-        throw new Error('No valid passenger details provided');
-      }
-
-      await checkinApi.updatePassengerDetails(booking.bookingRef, passengerUpdates);
-
-      setDetails((prevDetails: Record<string, PassengerExtraDetails>) => ({
-        ...prevDetails,
-        ...details
+      const updates = Object.entries(batchDetails).map(([passengerId, detail]) => ({
+        passengerId,
+        phoneNumber: detail.phone,
+        nationality: detail.nationality,
+        documentNumber: '', // Default or from detail if exists
       }));
 
-      navigate('/checkin/dg');
+      const updatedPassengers = await checkinApi.updatePassengerDetails(booking.bookingRef, updates);
+
+      // Update the context with the new passenger details
+      if (updatedPassengers.length > 0) {
+        setDetails((prevDetails) => ({
+          ...prevDetails,
+          ...batchDetails
+        }));
+
+        navigate('/checkin/dg');
+      }
     } catch (error) {
-      openModal({
-        title: 'Update Failed',
-        message: 'Failed to save passenger details. Please try again.'
-      });
+      console.error('Passenger details update failed:', error);
+      const apiError = error as ApiError;
+      showErrorModal('Update Failed', apiError.userMessage || apiError.message || 'An error occurred while updating passenger details. Please try again.');
     }
-  }, [booking, navigate, openModal, setDetails]);
+  }, [booking, navigate, setDetails, showErrorModal]);
 
   const handleDGAcknowledge = useCallback(() => {
     navigate('/checkin/boarding');
@@ -198,9 +141,9 @@ export const CheckinFlow = () => {
   }), [handlePassengerSelect, navigate]);
 
   const passengerDetailsHandlers = useMemo(() => ({
-    onNext: handlePassengerDetailsSubmit,
+    onNext: handleUpdatePassengerDetails,
     onBack: () => navigate('/checkin/select')
-  }), [handlePassengerDetailsSubmit, navigate]);
+  }), [handleUpdatePassengerDetails, navigate]);
 
   const dangerousGoodsHandlers = useMemo(() => ({
     onAccept: handleDGAcknowledge,
@@ -274,7 +217,7 @@ export const CheckinFlow = () => {
       < div className="flex-1 overflow-y-auto pb-24 sm:pb-28" >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <Routes>
-            <Route path="/checkin/start" element={<CheckinForm onSubmit={handleCheckinSubmit} />} />
+            <Route path="/checkin/start" element={<CheckinForm onSubmit={handleStartCheckin} />} />
             <Route
               path="/checkin/select"
               element={

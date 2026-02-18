@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 import PassengerSelect from './PassengerSelect';
-import type { Passenger } from '../types/passenger';
+import type { Passenger } from '../types/checkin';
 
 // Helper to create test passengers with required fields
 const createTestPassenger = (
@@ -11,10 +11,12 @@ const createTestPassenger = (
   paxType: string,
   seat?: string
 ): Passenger => ({
+  id: `p-${Math.random().toString(36).substr(2, 9)}`,
   firstName,
   lastName,
-  paxType,
+  paxType: paxType as any,
   seat,
+  checkedIn: false,
 });
 
 // Test data
@@ -208,131 +210,131 @@ describe('PassengerSelect', () => {
       const onBack = vi.fn();
       render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
-            const selectAllButton = screen.getByRole('button', { name: /select all/i });
-            await user.click(selectAllButton);
+      const selectAllButton = screen.getByRole('button', { name: /select all/i });
+      await user.click(selectAllButton);
 
-            await waitFor(() => {
-                expect(screen.getByRole('button', { name: /clear all/i })).toBeInTheDocument();
-            });
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /clear all/i })).toBeInTheDocument();
+      });
 
-            const clearAllButton = screen.getByRole('button', { name: /clear all/i });
-            await user.click(clearAllButton);
+      const clearAllButton = screen.getByRole('button', { name: /clear all/i });
+      await user.click(clearAllButton);
 
-            await waitFor(() => {
-                expect(screen.getByRole('button', { name: /select all/i })).toBeInTheDocument();
-                expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled();
-            });
-        });
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /select all/i })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled();
+      });
+    });
+  });
+
+  describe('Navigation', () => {
+    it('should call onNext with selected passengers when Continue is clicked', async () => {
+      const user = userEvent.setup();
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+
+      const alexCard = screen.getByText('Alex Huum').closest('button');
+      await user.click(alexCard!);
+
+      const continueButton = screen.getByRole('button', { name: /continue/i });
+      await user.click(continueButton);
+
+      await waitFor(() => {
+        expect(onNext).toHaveBeenCalledTimes(1);
+        expect(onNext).toHaveBeenCalledWith([mockPassengers[0]]);
+      });
     });
 
-    describe('Navigation', () => {
-        it('should call onNext with selected passengers when Continue is clicked', async () => {
-            const user = userEvent.setup();
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    it('should call onNext with multiple selected passengers', async () => {
+      const user = userEvent.setup();
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
-            const alexCard = screen.getByText('Alex Huum').closest('button');
-            await user.click(alexCard!);
+      const selectAllButton = screen.getByRole('button', { name: /select all/i });
+      await user.click(selectAllButton);
 
-            const continueButton = screen.getByRole('button', { name: /continue/i });
-            await user.click(continueButton);
+      const continueButton = screen.getByRole('button', { name: /continue/i });
+      await user.click(continueButton);
 
-            await waitFor(() => {
-                expect(onNext).toHaveBeenCalledTimes(1);
-                expect(onNext).toHaveBeenCalledWith([mockPassengers[0]]);
-            });
-        });
-
-        it('should call onNext with multiple selected passengers', async () => {
-            const user = userEvent.setup();
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
-
-            const selectAllButton = screen.getByRole('button', { name: /select all/i });
-            await user.click(selectAllButton);
-
-            const continueButton = screen.getByRole('button', { name: /continue/i });
-            await user.click(continueButton);
-
-            await waitFor(() => {
-                expect(onNext).toHaveBeenCalledTimes(1);
-                expect(onNext).toHaveBeenCalledWith(mockPassengers);
-            });
-        });
-
-        it('should call onBack when Back button is clicked', async () => {
-            const user = userEvent.setup();
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
-
-            const backButton = screen.getByRole('button', { name: /back/i });
-            await user.click(backButton);
-
-            expect(onBack).toHaveBeenCalledTimes(1);
-        });
-
-        it('should not call onNext when Continue is clicked without selection', () => {
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
-
-            const continueButton = screen.getByRole('button', { name: /continue/i });
-            expect(continueButton).toBeDisabled();
-            expect(onNext).not.toHaveBeenCalled();
-        });
+      await waitFor(() => {
+        expect(onNext).toHaveBeenCalledTimes(1);
+        expect(onNext).toHaveBeenCalledWith(mockPassengers);
+      });
     });
 
-    describe('Edge Cases', () => {
-        it('should handle empty passenger list', () => {
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            render(<PassengerSelect passengers={[]} onNext={onNext} onBack={onBack} />);
+    it('should call onBack when Back button is clicked', async () => {
+      const user = userEvent.setup();
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
 
-            expect(screen.getByText('Select Passengers')).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled();
-        });
+      const backButton = screen.getByRole('button', { name: /back/i });
+      await user.click(backButton);
 
-        it('should handle single passenger', async () => {
-            const user = userEvent.setup();
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            const singlePassenger = [mockPassengers[0]];
-
-            render(<PassengerSelect passengers={singlePassenger} onNext={onNext} onBack={onBack} />);
-
-            const alexCard = screen.getByText('Alex Huum').closest('button');
-            await user.click(alexCard!);
-
-            const continueButton = screen.getByRole('button', { name: /continue/i });
-            await user.click(continueButton);
-
-            await waitFor(() => {
-                expect(onNext).toHaveBeenCalledWith(singlePassenger);
-            });
-        });
-
-        it('should handle passengers without seats', () => {
-            const onNext = vi.fn();
-            const onBack = vi.fn();
-            const passengersWithoutSeats = [
-              createTestPassenger('Alex', 'Huum', 'ADT'), // No seat provided
-              createTestPassenger('John', 'Smith', 'INF', '12B') // With seat
-            ];
-
-            render(<PassengerSelect passengers={passengersWithoutSeats} onNext={onNext} onBack={onBack} />);
-
-            // The first passenger should not show a seat
-            const alexCard = screen.getByTestId('passenger-0');
-            expect(alexCard).toHaveTextContent('Alex Huum');
-            expect(alexCard).toHaveTextContent('No seat assigned');
-
-            // The second passenger should show their seat
-            const johnCard = screen.getByTestId('passenger-1');
-            expect(johnCard).toHaveTextContent('John Smith');
-            expect(johnCard).toHaveTextContent('Seat 12B');
-        });
+      expect(onBack).toHaveBeenCalledTimes(1);
     });
+
+    it('should not call onNext when Continue is clicked without selection', () => {
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+
+      const continueButton = screen.getByRole('button', { name: /continue/i });
+      expect(continueButton).toBeDisabled();
+      expect(onNext).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle empty passenger list', () => {
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      render(<PassengerSelect passengers={[]} onNext={onNext} onBack={onBack} />);
+
+      expect(screen.getByText('Select Passengers')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /continue/i })).toBeDisabled();
+    });
+
+    it('should handle single passenger', async () => {
+      const user = userEvent.setup();
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      const singlePassenger = [mockPassengers[0]];
+
+      render(<PassengerSelect passengers={singlePassenger} onNext={onNext} onBack={onBack} />);
+
+      const alexCard = screen.getByText('Alex Huum').closest('button');
+      await user.click(alexCard!);
+
+      const continueButton = screen.getByRole('button', { name: /continue/i });
+      await user.click(continueButton);
+
+      await waitFor(() => {
+        expect(onNext).toHaveBeenCalledWith(singlePassenger);
+      });
+    });
+
+    it('should handle passengers without seats', () => {
+      const onNext = vi.fn();
+      const onBack = vi.fn();
+      const passengersWithoutSeats = [
+        createTestPassenger('Alex', 'Huum', 'ADT'), // No seat provided
+        createTestPassenger('John', 'Smith', 'INF', '12B') // With seat
+      ];
+
+      render(<PassengerSelect passengers={passengersWithoutSeats} onNext={onNext} onBack={onBack} />);
+
+      // The first passenger should not show a seat
+      const alexCard = screen.getByTestId('passenger-0');
+      expect(alexCard).toHaveTextContent('Alex Huum');
+      expect(alexCard).toHaveTextContent('No seat assigned');
+
+      // The second passenger should show their seat
+      const johnCard = screen.getByTestId('passenger-1');
+      expect(johnCard).toHaveTextContent('John Smith');
+      expect(johnCard).toHaveTextContent('Seat 12B');
+    });
+  });
 });

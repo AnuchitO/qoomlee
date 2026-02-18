@@ -10,7 +10,7 @@ export type CheckinState = {
 type Ctx = CheckinState & {
   setBooking: (b: Booking | null) => void;
   setSelectedPassengers: (p: Passenger[]) => void;
-  setDetails: (d: Record<string, PassengerExtraDetails>) => void;
+  setDetails: React.Dispatch<React.SetStateAction<Record<string, PassengerExtraDetails>>>;
   reset: () => void;
 };
 

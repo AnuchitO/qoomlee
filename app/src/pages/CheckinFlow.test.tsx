@@ -227,7 +227,7 @@ describe('CheckinFlow', () => {
       isEligible: true,
       bookingRef: 'ABC123',
       passengers: [
-        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+        { id: 'alex-1', firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
       ],
       journeys: [
         {
@@ -252,7 +252,7 @@ describe('CheckinFlow', () => {
     };
 
     // Mock the startCheckin function to resolve with our mock booking
-    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
+    vi.mocked(checkinApi.startCheckin).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 
@@ -281,7 +281,7 @@ describe('CheckinFlow', () => {
       isEligible: true,
       bookingRef: 'ABC123',
       passengers: [
-        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+        { id: 'alex-1', firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
       ],
       journeys: [
         {
@@ -306,7 +306,7 @@ describe('CheckinFlow', () => {
     };
 
     // Mock the startCheckin function to resolve with our mock booking
-    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
+    vi.mocked(checkinApi.startCheckin).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 
@@ -347,7 +347,7 @@ describe('CheckinFlow', () => {
       isEligible: true,
       bookingRef: 'ABC123',
       passengers: [
-        { firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
+        { id: 'alex-1', firstName: 'Alex', lastName: 'Huum', paxType: PaxType.ADT, seat: '12A', checkedIn: false },
       ],
       journeys: [
         {
@@ -372,7 +372,7 @@ describe('CheckinFlow', () => {
     };
 
     // Mock the startCheckin function to resolve with our mock booking
-    (checkinApi.startCheckin as jest.Mock).mockResolvedValueOnce(mockBooking);
+    vi.mocked(checkinApi.startCheckin).mockResolvedValueOnce(mockBooking);
 
     renderWithProviders('/checkin/start');
 

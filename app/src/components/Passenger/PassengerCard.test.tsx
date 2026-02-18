@@ -1,14 +1,16 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import PassengerCard from './PassengerCard';
-import type { Passenger } from '../../types/passenger';
+import type { Passenger } from '../../types/checkin';
 
 describe('PassengerCard', () => {
   const mockPassenger: Passenger = {
+    id: '1',
     firstName: 'John',
     lastName: 'Doe',
-    paxType: 'ADT',
+    paxType: 'ADT' as any,
     seat: '10A',
+    checkedIn: false,
   };
 
   const mockOnToggle = vi.fn();

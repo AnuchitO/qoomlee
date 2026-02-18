@@ -6,9 +6,10 @@ import TravelTipsSidebar from './components/TravelTipsSidebar';
 import Footer from './components/Footer';
 import MobileBottomNav from './components/nav/MobileBottomNav';
 import { useModal } from './components/ModalProvider';
-import { CheckinFlow, startCheckin } from './pages/CheckinFlow';
+import { CheckinFlow } from './pages/CheckinFlow';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useCheckin } from './context/CheckinContext';
+import { checkinApi } from './services/checkinApi';
 import { useCallback } from 'react';
 
 function App() {
@@ -17,19 +18,17 @@ function App() {
   const location = useLocation();
   const { setBooking } = useCheckin();
 
-   const handleCheckinSubmit = useCallback(async (payload: CheckinPayload) => {
-    await startCheckin(payload, {
-      onSuccess: (booking) => {
-        setBooking(booking);
-        navigate('/checkin/select');
-      },
-      onError: (error) => {
-        openModal({
-          title: 'Check-in Error',
-          message: error.message,
-        });
-      }
-    });
+  const handleCheckinSubmit = useCallback(async (payload: CheckinPayload) => {
+    try {
+      const booking = await checkinApi.startCheckin(payload.bookingRef, payload.lastName);
+      setBooking(booking as any);
+      navigate('/checkin/select');
+    } catch (error: any) {
+      openModal({
+        title: 'Check-in Error',
+        message: error.userMessage || error.message,
+      });
+    }
   }, [setBooking, navigate, openModal]);
 
   const isCheckin = location.pathname.startsWith('/checkin');

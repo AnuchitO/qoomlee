@@ -7,6 +7,7 @@ type PassengerExtraDetails = {
 };
 
 type Passenger = {
+  id: string;
   firstName: string;
   lastName: string;
 };
@@ -16,7 +17,7 @@ export const usePassengerForm = (passengers: Passenger[]) => {
     () =>
       Object.fromEntries(
         passengers.map((passenger) => [
-          `${passenger.firstName}-${passenger.lastName}`,
+          passenger.id,
           { nationality: '', phone: '', countryCode: '+66' },
         ])
       )
@@ -55,7 +56,7 @@ export const usePassengerForm = (passengers: Passenger[]) => {
 
   const isFormValid = useCallback(() => {
     return passengers.every((passenger) => {
-      const key = `${passenger.firstName}-${passenger.lastName}`;
+      const key = passenger.id;
       const d = details[key];
       return d && validateNationality(d.nationality) === null && validatePhone(d.phone) === null;
     });
@@ -82,7 +83,7 @@ export const usePassengerForm = (passengers: Passenger[]) => {
   }, []);
 
   const getPassengerKey = useCallback(
-    (passenger: Passenger) => `${passenger.firstName}-${passenger.lastName}`,
+    (passenger: Passenger) => passenger.id,
     []
   );
 

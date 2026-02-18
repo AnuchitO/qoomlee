@@ -5,6 +5,7 @@ import { Passenger, PaxType } from '../../types/checkin';
 
 describe('PassengerDetail', () => {
   const mockPassenger: Passenger = {
+    id: '1',
     firstName: 'John',
     lastName: 'Doe',
     paxType: PaxType.ADT,
