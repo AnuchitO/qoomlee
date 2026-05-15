@@ -1,0 +1,133 @@
+services:
+  # PostgreSQL database for booking and check-in services
+  postgres:
+    image: postgres:15
+    container_name: qoomlee_postgres
+    environment:
+      POSTGRES_DB: qoomlee_main
+      POSTGRES_USER: qoomlee_user
+      POSTGRES_PASSWORD: qoomlee_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - qoomlee_network
+
+  # Elasticsearch for flight search
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: qoomlee_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - qoomlee_network
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: qoomlee_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - qoomlee_network
+
+  # Booking Service (Kotlin Spring Boot) - TEMPORARILY DISABLED due to build issues
+  # booking-service:
+  #   build:
+  #     context: ./backend/booking-service
+  #     dockerfile: docker/Dockerfile
+  #   container_name: qoomlee_booking_service
+  #   ports:
+  #     - "8081:8081"
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     DATABASE_URL: jdbc:postgresql://postgres:5432/qoomlee_main
+  #     DB_HOST: postgres
+  #     DB_PORT: 5432
+  #     DB_NAME: qoomlee_main
+  #     DB_USER: qoomlee_user
+  #     DB_PASS: qoomlee_pass
+  #   depends_on:
+  #     - postgres
+  #   networks:
+  #     - qoomlee_network
+
+  # Check-in Service (Go)
+  checkin-service:
+    build:
+      context: ./backend/checkin-service
+      dockerfile: Dockerfile
+    container_name: qoomlee_checkin_service
+    ports:
+      - "8082:8082"
+    environment:
+      DATABASE_URL: host=postgres user=qoomlee_user password=qoomlee_pass dbname=qoomlee_main port=5432 sslmode=disable
+    depends_on:
+      - postgres
+    networks:
+      - qoomlee_network
+
+  # Flight Search Service (Bun/TypeScript)
+  flight-search-service:
+    build:
+      context: ./backend/flight-search-service
+      dockerfile: Dockerfile
+    container_name: qoomlee_flight_search_service
+    ports:
+      - "8085:8080"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - elasticsearch
+      - redis
+    networks:
+      - qoomlee_network
+
+  # Payment Service (Bun/TypeScript)
+  payment-service:
+    build:
+      context: ./backend/payment-service
+      dockerfile: Dockerfile
+    container_name: qoomlee_payment_service
+    ports:
+      - "8083:8083"
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_placeholder}
+      OMISE_SECRET_KEY: ${OMISE_SECRET_KEY:-skey_test_placeholder}
+      OMISE_PUBLIC_KEY: ${OMISE_PUBLIC_KEY:-pkey_test_placeholder}
+    networks:
+      - qoomlee_network
+
+    # Simple UI to explore the services
+  simple-ui:
+    image: nginx:alpine
+    container_name: qoomlee_simple_ui
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend-static:/usr/share/nginx/html
+    depends_on:
+      - checkin-service
+      - flight-search-service
+      - payment-service
+    networks:
+      - qoomlee_network
+
+volumes:
+  postgres_data:
+  elasticsearch_data:
+  redis_data:
+
+networks:
+  qoomlee_network:
+    driver: bridge

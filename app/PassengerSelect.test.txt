@@ -1,0 +1,79 @@
+import { render, screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
+import PassengerSelect from '../PassengerSelect';
+import type { Passenger } from '../../types/passenger';
+
+const mockPassengers: Passenger[] = [
+  { firstName: 'John', lastName: 'Doe', paxType: 'Adult', seat: '12A' },
+  { firstName: 'Jane', lastName: 'Doe', paxType: 'Adult', seat: '12B' },
+];
+
+describe('PassengerSelect', () => {
+  const onNext = vi.fn();
+  const onBack = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders all passengers', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+  });
+
+  it('toggles passenger selection', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    const firstPassenger = screen.getByTestId('passenger-0');
+    
+    // Select first passenger
+    fireEvent.click(firstPassenger);
+    expect(firstPassenger).toHaveAttribute('aria-pressed', 'true');
+    
+    // Deselect first passenger
+    fireEvent.click(firstPassenger);
+    expect(firstPassenger).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('toggles all passengers with select all', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    const selectAllButton = screen.getByText('Select All');
+    
+    // Select all
+    fireEvent.click(selectAllButton);
+    mockPassengers.forEach((_, index) => {
+      expect(screen.getByTestId(`passenger-${index}`)).toHaveAttribute('aria-pressed', 'true');
+    });
+    
+    // Clear all
+    const clearAllButton = screen.getByText('Clear All');
+    fireEvent.click(clearAllButton);
+    mockPassengers.forEach((_, index) => {
+      expect(screen.getByTestId(`passenger-${index}`)).toHaveAttribute('aria-pressed', 'false');
+    });
+  });
+
+  it('calls onNext with selected passengers', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    
+    // Select first passenger
+    fireEvent.click(screen.getByTestId('passenger-0'));
+    
+    // Click continue
+    fireEvent.click(screen.getByText('Continue'));
+    
+    expect(onNext).toHaveBeenCalledWith([mockPassengers[0]]);
+  });
+
+  it('calls onBack when back button is clicked', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    fireEvent.click(screen.getByText('Back'));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables continue button when no passengers are selected', () => {
+    render(<PassengerSelect passengers={mockPassengers} onNext={onNext} onBack={onBack} />);
+    const continueButton = screen.getByText('Continue').closest('button');
+    expect(continueButton).toBeDisabled();
+  });
+});
