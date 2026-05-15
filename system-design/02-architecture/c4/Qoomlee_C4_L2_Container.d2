@@ -1,0 +1,170 @@
+direction: right
+
+title: |md
+  # Qoomlee — C4 Level 2: Container Diagram
+  *What are the deployable units and how do they communicate?*
+|
+
+# ── External Actors ───────────────────────────────────────────────────────────
+
+staff: Staff Browser {
+  shape: rectangle
+  style.fill: "#4B5563"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#374151"
+  style.border-radius: 6
+  label: "Staff Browser\n(Ground Agent / Gate Officer / Ops Admin)\nNext.js SSR served app"
+}
+
+# ── Qoomlee System Boundary ───────────────────────────────────────────────────
+
+qoomlee: Qoomlee Ops Platform {
+  style.fill: "#EBF2FA"
+  style.stroke: "#2E6DA4"
+  style.stroke-width: 2
+  style.border-radius: 12
+
+  frontend: Next.js Frontend {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "TypeScript / Next.js SSR — Ops dashboard, booking UI, seat map, check-in screens. Bilingual TH/EN via next-intl. Deployed on Vercel or GCP Cloud Run."
+  }
+
+  gateway: API Gateway {
+    shape: rectangle
+    style.fill: "#2E6DA4"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Golang — JWT validation, RBAC enforcement, rate limiting, request routing to downstream services. Single entry point for all API calls."
+  }
+
+  booking_svc: Booking Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Java / Kotlin (Spring Boot) — PNR lifecycle, seat inventory state machine, fare rules, booking CRUD. Owns bookings + passengers tables."
+  }
+
+  checkin_svc: Check-In Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Golang — Check-in session management, seat assignment, boarding pass PDF generation (IATA BCBP), gate manifest, offline cache. Owns checkins table."
+  }
+
+  payment_svc: Payment Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Golang — Omise card charge, PromptPay QR generation, webhook handler, refund processing, daily reconciliation. Owns payments + transactions tables."
+  }
+
+  flight_svc: Flight Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Java / Kotlin — Flight schedule CRUD, route configuration, aircraft seat map config, flight status management. Owns flights + routes + aircraft tables."
+  }
+
+  identity_svc: Identity Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Golang — Staff account management, JWT issuance & validation, RBAC roles, audit log, session invalidation. Owns staff + audit_log tables."
+  }
+
+  notification_svc: Notification Service {
+    shape: rectangle
+    style.fill: "#374151"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Golang — Async email (SendGrid) and SMS (Twilio/True Move H) dispatch. Consumes events from Redis Streams. Owns notification_log table."
+  }
+
+  # ── Data Stores ────────────────────────────────────────────────────────────
+
+  postgres: PostgreSQL {
+    shape: cylinder
+    style.fill: "#DBEAFE"
+    style.stroke: "#2E6DA4"
+    style.font-color: "#1A3557"
+    tooltip: "Primary relational database — bookings, passengers, payments, flights, staff, audit_log, checkins. AES-256 at rest. PITR enabled (5-min RPO)."
+  }
+
+  redis: Redis {
+    shape: cylinder
+    style.fill: "#FEF3C7"
+    style.stroke: "#D97706"
+    style.font-color: "#92540A"
+    tooltip: "In-memory store — JWT session cache, seat lock TTLs (8-min), check-in manifest cache (offline mode), Redis Streams for async notification events."
+  }
+}
+
+# ── External Systems ──────────────────────────────────────────────────────────
+
+omise: Omise API {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+  style.stroke: "#374151"
+}
+
+email_provider: SendGrid {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+  style.stroke: "#374151"
+}
+
+sms_provider: SMS Provider {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+  style.stroke: "#374151"
+  label: "SMS Provider\n(Twilio / True Move H)"
+}
+
+# ── Connections ───────────────────────────────────────────────────────────────
+
+staff -> qoomlee.frontend: "HTTPS — web browser" {style.stroke: "#1A3557"}
+
+qoomlee.frontend -> qoomlee.gateway: "HTTPS REST — API calls\n(auth header: Bearer JWT)" {style.stroke: "#2E6DA4"}
+
+qoomlee.gateway -> qoomlee.identity_svc: "Validate JWT / check role\n[REST]" {style.stroke: "#6B7280"; style.stroke-dash: 3}
+qoomlee.gateway -> qoomlee.booking_svc: "Route booking requests\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.checkin_svc: "Route check-in requests\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.payment_svc: "Route payment requests\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.flight_svc: "Route flight/schedule requests\n[REST]" {style.stroke: "#1E5F8C"}
+
+qoomlee.booking_svc -> qoomlee.postgres: "Read/write bookings,\npassengers, seat_inventory" {style.stroke: "#2E6DA4"}
+qoomlee.booking_svc -> qoomlee.redis: "Seat lock TTL\n(8-min expiry)" {style.stroke: "#D97706"}
+qoomlee.booking_svc -> qoomlee.notification_svc: "Publish: booking_confirmed,\nbooking_cancelled [Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+
+qoomlee.checkin_svc -> qoomlee.postgres: "Read/write checkins,\nboarding_passes, manifests" {style.stroke: "#2E6DA4"}
+qoomlee.checkin_svc -> qoomlee.redis: "Manifest cache\n(offline fallback)" {style.stroke: "#D97706"}
+qoomlee.checkin_svc -> qoomlee.notification_svc: "Publish: boarding_pass_ready\n[Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+
+qoomlee.payment_svc -> qoomlee.postgres: "Read/write payments,\ntransactions, refunds" {style.stroke: "#2E6DA4"}
+qoomlee.payment_svc -> qoomlee.booking_svc: "Confirm booking on\npayment success [REST event]" {style.stroke: "#E8A020"}
+qoomlee.payment_svc -> omise: "Card charge, QR generate,\nrefund [HTTPS REST]" {style.stroke: "#E8A020"}
+
+qoomlee.flight_svc -> qoomlee.postgres: "Read/write flights,\nroutes, aircraft, status" {style.stroke: "#2E6DA4"}
+
+qoomlee.identity_svc -> qoomlee.postgres: "Read/write staff,\naudit_log, sessions" {style.stroke: "#2E6DA4"}
+qoomlee.identity_svc -> qoomlee.redis: "JWT session cache\n+ invalidation" {style.stroke: "#D97706"}
+
+qoomlee.notification_svc -> qoomlee.redis: "Consume events\n[Redis Streams]" {style.stroke: "#D97706"}
+qoomlee.notification_svc -> email_provider: "Send e-ticket, boarding pass\n[SMTP / API]" {style.stroke: "#6B7280"}
+qoomlee.notification_svc -> sms_provider: "Send OTP, booking confirm,\ndelay alert [API]" {style.stroke: "#6B7280"}
+
+omise -> qoomlee.payment_svc: "PromptPay payment\nwebhook [HTTPS POST]" {style.stroke: "#E8A020"; style.stroke-dash: 3}

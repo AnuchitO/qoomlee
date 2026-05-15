@@ -1,0 +1,208 @@
+direction: down
+
+title: |md
+  # Qoomlee — C4 Level 3: Component Diagram
+  *Booking Service (Java/Kotlin) + Payment Service (Golang) internals*
+|
+
+# ── Inbound ───────────────────────────────────────────────────────────────────
+
+api_gw: API Gateway {
+  shape: rectangle
+  style.fill: "#4B5563"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+}
+
+# ── Booking Service ───────────────────────────────────────────────────────────
+
+booking: Booking Service (Java / Kotlin) {
+  style.fill: "#EBF2FA"
+  style.stroke: "#1A3557"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  flight_search: FlightSearchHandler {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles GET /flights/search — queries Flight Service via REST, applies seat inventory filter, returns available flights with fare classes"
+  }
+
+  pnr_manager: PNRManager {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Core domain component — generates IATA-format PNR (6-char alphanumeric), manages PNR state machine: PENDING→CONFIRMED→CHECKED_IN→BOARDED→CANCELLED"
+  }
+
+  seat_inventory: SeatInventoryService {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages seat availability per flight per fare class. Creates seat lock in Redis (8-min TTL). Converts lock to permanent assignment on payment confirmation."
+  }
+
+  fare_engine: FareRulesEngine {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Applies modification fees, cancellation refund policy, fare class rules. Reads fare_rules table. Returns computed fee amounts."
+  }
+
+  booking_repo: BookingRepository {
+    shape: rectangle
+    style.fill: "#2E6DA4"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "JPA/Hibernate repository — CRUD on bookings, passengers, seat_inventory tables. Handles optimistic locking to prevent double-booking."
+  }
+
+  event_publisher: DomainEventPublisher {
+    shape: rectangle
+    style.fill: "#374151"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Publishes domain events to Redis Streams: booking.confirmed, booking.cancelled, booking.modified — consumed by Notification Service and Payment Service"
+  }
+
+  state_machine: BookingStateMachine {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Spring State Machine — enforces valid transitions: PENDING→CONFIRMED (on payment), CONFIRMED→CHECKED_IN (on check-in), CONFIRMED→CANCELLED (on cancel). Rejects invalid transitions."
+  }
+}
+
+# ── Payment Service ───────────────────────────────────────────────────────────
+
+payment: Payment Service (Golang) {
+  style.fill: "#FFF7ED"
+  style.stroke: "#D97706"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  charge_handler: ChargeHandler {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "POST /payments/charge — receives Omise token, calls Omise Charge API, records transaction. Returns charge ID and status."
+  }
+
+  qr_handler: PromptPayQRHandler {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "POST /payments/promptpay — calls Omise PromptPay API, receives QR payload, stores pending transaction. QR expires in 10 minutes."
+  }
+
+  webhook_handler: OmiseWebhookHandler {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "POST /webhooks/omise — validates Omise HMAC signature, processes payment.capture.success / payment.fail events, triggers booking confirmation via REST call to Booking Service."
+  }
+
+  refund_handler: RefundHandler {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "POST /payments/refund — calls Omise Refund API for card payments. Flags PromptPay refunds for manual bank transfer. Updates refunds table."
+  }
+
+  reconciler: ReconciliationJob {
+    shape: rectangle
+    style.fill: "#374151"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Cron job (daily 01:00 ICT) — aggregates transactions by payment method, computes net revenue, flags mismatches vs Omise dashboard, generates reconciliation report."
+  }
+
+  payment_repo: PaymentRepository {
+    shape: rectangle
+    style.fill: "#D97706"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "PostgreSQL CRUD on payments, transactions, refunds tables. No raw card data stored — only Omise charge IDs and masked card last-4."
+  }
+}
+
+# ── Data Stores ───────────────────────────────────────────────────────────────
+
+pg: PostgreSQL {
+  shape: cylinder
+  style.fill: "#DBEAFE"
+  style.stroke: "#2E6DA4"
+  style.font-color: "#1A3557"
+}
+
+redis: Redis {
+  shape: cylinder
+  style.fill: "#FEF3C7"
+  style.stroke: "#D97706"
+  style.font-color: "#92540A"
+}
+
+omise_api: Omise API {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+  style.stroke: "#374151"
+}
+
+notif: Notification Service {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.border-radius: 6
+  style.stroke: "#374151"
+}
+
+# ── Internal Booking Connections ──────────────────────────────────────────────
+
+api_gw -> booking.flight_search: "GET /flights/search"
+api_gw -> booking.pnr_manager: "POST /bookings\nGET /bookings/:id\nPATCH /bookings/:id\nDELETE /bookings/:id"
+api_gw -> payment.charge_handler: "POST /payments/charge"
+api_gw -> payment.qr_handler: "POST /payments/promptpay"
+api_gw -> payment.refund_handler: "POST /payments/refund"
+
+booking.pnr_manager -> booking.state_machine: "Validate & execute\nstate transition"
+booking.pnr_manager -> booking.seat_inventory: "Request seat lock\nor confirm seat"
+booking.pnr_manager -> booking.fare_engine: "Calculate modification\nor cancellation fee"
+booking.pnr_manager -> booking.booking_repo: "Persist booking\nstate change"
+booking.pnr_manager -> booking.event_publisher: "Emit domain event\non state change"
+
+booking.seat_inventory -> redis: "SET seat_lock:{flightId}:{seat}\nEX 480 (8-min TTL)"
+booking.booking_repo -> pg: "INSERT/UPDATE/SELECT\nbookings, passengers,\nseat_inventory"
+booking.event_publisher -> redis: "XADD booking_events\n[Redis Stream]"
+
+# ── Payment Connections ───────────────────────────────────────────────────────
+
+payment.charge_handler -> payment.payment_repo: "Record transaction"
+payment.charge_handler -> omise_api: "POST /charges\n[Omise REST API]"
+
+payment.qr_handler -> payment.payment_repo: "Record pending transaction"
+payment.qr_handler -> omise_api: "POST /charges (source.type=promptpay)"
+
+payment.webhook_handler -> payment.payment_repo: "Update transaction status"
+payment.webhook_handler -> booking.pnr_manager: "Confirm booking\nPATCH /bookings/:id/confirm"
+
+payment.refund_handler -> omise_api: "POST /charges/:id/refunds"
+payment.refund_handler -> payment.payment_repo: "Record refund"
+
+payment.reconciler -> payment.payment_repo: "Aggregate daily transactions"
+payment.payment_repo -> pg: "INSERT/UPDATE/SELECT\npayments, transactions, refunds"
+
+# ── Cross-service async ───────────────────────────────────────────────────────
+
+redis -> notif: "XREAD booking_events\n[async consumer]" {style.stroke-dash: 4; style.stroke: "#9CA3AF"}

@@ -1,0 +1,139 @@
+direction: right
+
+title: |md
+  # Qoomlee — C4 Level 1: System Context
+  *Who uses the system and what external systems does it talk to?*
+|
+
+vars: {
+  person-fill: "#1A3557"
+  person-stroke: "#0D2137"
+  system-fill: "#2E6DA4"
+  system-stroke: "#1A3557"
+  ext-fill: "#6B7280"
+  ext-stroke: "#374151"
+  label-color: "#FFFFFF"
+}
+
+# ── Actors ───────────────────────────────────────────────────────────────────
+
+ground_agent: Ground Agent {
+  shape: person
+  style.fill: "#1A3557"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#0D2137"
+  tooltip: "Airline counter staff who create and manage bookings on behalf of walk-in passengers"
+}
+
+gate_officer: Gate Officer {
+  shape: person
+  style.fill: "#1A3557"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#0D2137"
+  tooltip: "Staff at the departure gate who manage boarding and manifest"
+}
+
+ops_admin: Ops Admin {
+  shape: person
+  style.fill: "#1A3557"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#0D2137"
+  tooltip: "Operations manager with full system access — flight config, reports, user management"
+}
+
+passenger: Passenger {
+  shape: person
+  style.fill: "#4B5563"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#374151"
+  tooltip: "Traveller whose data is managed through the system (indirect user)"
+}
+
+# ── Core System ───────────────────────────────────────────────────────────────
+
+qoomlee_ops: Qoomlee Ops System {
+  shape: rectangle
+  style.fill: "#2E6DA4"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#1A3557"
+  style.border-radius: 8
+  tooltip: "Internal airline operations platform — booking management, check-in, boarding, payments, flight ops view"
+}
+
+# ── External Systems ──────────────────────────────────────────────────────────
+
+omise: Omise Payment Gateway {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#374151"
+  style.border-radius: 8
+  tooltip: "Thai payment gateway — credit/debit card processing and PromptPay QR generation"
+}
+
+promptpay: PromptPay / Bank Network {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#374151"
+  style.border-radius: 8
+  tooltip: "Thai interbank payment network — real-time QR payment confirmation via Omise webhook"
+}
+
+email_sms: Email + SMS Provider {
+  shape: rectangle
+  style.fill: "#6B7280"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#374151"
+  style.border-radius: 8
+  tooltip: "SendGrid (email) + Twilio / True Move H (SMS) — e-tickets, boarding passes, delay alerts"
+}
+
+# ── Connections ───────────────────────────────────────────────────────────────
+
+ground_agent -> qoomlee_ops: "Search flights, create PNR,\nprocess payment, modify/cancel booking" {
+  style.stroke: "#2E6DA4"
+  style.font-color: "#1A3557"
+}
+
+gate_officer -> qoomlee_ops: "View manifest, scan boarding pass,\nclose gate, flag no-shows" {
+  style.stroke: "#2E6DA4"
+  style.font-color: "#1A3557"
+}
+
+ops_admin -> qoomlee_ops: "Manage flights, users,\nreports, flight status" {
+  style.stroke: "#2E6DA4"
+  style.font-color: "#1A3557"
+}
+
+passenger -> qoomlee_ops: "Passenger data & booking\n(via agent, not direct)" {
+  style.stroke: "#9CA3AF"
+  style.stroke-dash: 4
+  style.font-color: "#6B7280"
+}
+
+qoomlee_ops -> omise: "Charge card, generate PromptPay QR,\nprocess refunds [HTTPS/REST]" {
+  style.stroke: "#E8A020"
+  style.font-color: "#92540A"
+}
+
+omise -> qoomlee_ops: "Payment confirmation webhook\n[HTTPS POST]" {
+  style.stroke: "#E8A020"
+  style.font-color: "#92540A"
+}
+
+omise -> promptpay: "PromptPay QR settlement" {
+  style.stroke: "#9CA3AF"
+  style.font-color: "#6B7280"
+}
+
+qoomlee_ops -> email_sms: "Send e-ticket, boarding pass,\ndelay alerts [SMTP / API]" {
+  style.stroke: "#9CA3AF"
+  style.font-color: "#6B7280"
+}
+
+email_sms -> passenger: "E-ticket, boarding pass,\nSMS confirmation" {
+  style.stroke: "#9CA3AF"
+  style.stroke-dash: 4
+  style.font-color: "#6B7280"
+}
