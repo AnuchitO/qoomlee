@@ -1,27 +1,43 @@
-# QOOMLEE AIRLINE SYSTEM - PROJECT STRUCTURE
+# Qoomlee System Design
 
-## Overview
-This repository contains the design documentation and planning materials for the Qoomlee Airline System - a hybrid (LCC comfort+) carrier connecting Southeast Asian tier-2 cities to Australian gateways.
+This repository contains the system design documentation for the Qoomlee airline booking and check-in system.
+
+## Directory Structure
+
+- [00-planning](./00-planning/) - Project planning, tracking, and management documents including sprint planning, epics, and project tracking boards
+- [01-documentation](./01-documentation/) - Core system definitions, requirements, and business context documentation
+- [02-architecture](./02-architecture/) - Technical architecture diagrams, API specifications, and system design documents
+- [03-database](./03-database/) - Database schemas, data models, and seed data
+- [04-ui-ux](./04-ui-ux/) - User interface designs, mockups, and user experience specifications
+
+## Documentation Index
+
+For a comprehensive overview of all documentation, see the [Index](./INDEX.md) which provides organized navigation through all system design documents.
+
+## Purpose
+
+This system design documentation serves as the central reference for:
+- Architects designing the system structure
+- Developers implementing features
+- Project managers tracking progress
+- Stakeholders understanding system capabilities
 
 ## Project Organization
-
-### Root Directory
-The root directory contains high-level project documents and planning materials:
-
-- `README.md` - This file, project overview and structure
 
 ### 00-Planning Directory
 Strategic planning and project initiation documents:
 
 ```
 00-planning/
-├── 00-project_tracking_board.md          # Project tracking board with sprints and stories
-├── 01-backlog_refinement.md              # Detailed backlog refinement with acceptance criteria
-├── 02-sprint_zero_tasks.md               # Sprint Zero foundational setup tasks
-├── 03-backlog_refinement_operations.md   # Operational backlog refinement for aviation compliance
-├── 04-definition_of_done.md              # Definition of Done for all user stories
-├── plan.md                               # Main project plan and methodology
-└── archive/mvp_action_plan_archived.md   # Archived MVP action plan (completed)
+├── 01-project_tracking_board_detailed.md    # Comprehensive project overview and tracking
+├── 02-epic_stories_detailed.md              # Complete epic and story breakdown with INVEST principles
+├── 03-sprint_planning_detailed.md           # Detailed sprint planning with goals and commitments
+├── 04-definition_of_done.md                 # Comprehensive Definition of Done with test scenarios
+├── 05-mvp_checklist.md                      # Minimum viable product requirements checklist
+├── backlog_refinement.md                    # Backlog management and refinement processes
+├── backlog_refinement_operations.md         # Operational aspects of backlog refinement
+├── README.md                                # Planning documentation overview
+└── sprint_zero_tasks.md                     # Initial setup and preparation tasks
 ```
 
 ### 01-Documentation Directory
@@ -29,11 +45,9 @@ Business and technical documentation organized by purpose:
 
 ```
 01-documentation/
-├── Qoomlee_Definition.md                    # Core system definition and concepts
-├── Qoomlee_Route_Market_Analysis.md         # Business case and market opportunity
-├── Qoomlee_MVP_PRD.docx                     # Product requirements for MVP
-├── Qoomlee_DB_Schema_API_Contract.docx      # Technical specifications for data and APIs
-└── stitch_ui_prompt.md                      # UI/UX design specifications
+├── Qoomlee_Definition.md                   # Core system definition and concepts
+├── README.md                               # Documentation overview
+└── stitch_ui_prompt.md                     # UI/UX design specifications and requirements
 ```
 
 ### 02-Architecture Directory
@@ -42,16 +56,9 @@ System architecture and design:
 ```
 02-architecture/
 ├── api/
-│   └── api_documentation.md                 # Comprehensive API documentation
-├── architecture/
-│   ├── Qoomlee_C4_L1_Context.d2            # System context diagram source
-│   ├── Qoomlee_C4_L1_Context.svg           # System context diagram
-│   ├── Qoomlee_C4_L2_Container.d2          # Container diagram source
-│   ├── Qoomlee_C4_L2_Container.svg         # Container diagram
-│   ├── Qoomlee_C4_L3_Component.d2          # Component diagram source
-│   ├── Qoomlee_C4_L3_Component.svg         # Component diagram
-│   └── technical_review.md                  # Technical architecture review
-└── README.md                               # Architecture documentation overview
+│   └── api_documentation.md                # Complete API specifications and endpoints
+├── README.md                               # Architecture overview and guidelines
+└── technical_review.md                     # Technical architecture review and considerations
 ```
 
 ### 03-Database Directory
@@ -59,7 +66,8 @@ Database schema and data:
 
 ```
 03-database/
-└── qoomlee_seeds.sql                       # Database seed data
+├── README.md                               # Database schema and management guidelines
+└── qoomlee_seeds.sql                       # Initial database seed data
 ```
 
 ### 04-UI-UX Directory
@@ -67,17 +75,10 @@ User interface and user experience:
 
 ```
 04-ui-ux/
-├── DESIGN.md                               # Design system specification
-├── stitch_ui_prompt.md                     # UI design prompts for Stitch
-└── ui_mockups.md                           # UI mockup documentation
+├── DESIGN.md                               # UI/UX design specifications and principles
+├── README.md                               # UI/UX design guidelines and overview
+└── ui_mockups.md                           # Interface mockups and design concepts
 ```
-
-## File Naming Convention
-Files follow the pattern: `XX-[category]-[description].[extension]`
-- XX: Sequential number for chronological order
-- category: Broad classification (planning, architecture, etc.)
-- description: Specific content description
-- extension: File format
 
 ## Development Workflow
 1. Start with files in `00-planning/` for project understanding
@@ -86,22 +87,14 @@ Files follow the pattern: `XX-[category]-[description].[extension]`
 4. Use `03-database/` for data structure understanding
 5. Reference `04-ui-ux/` for interface design
 
-## Getting Started
-For new team members, begin with:
-1. `00-planning/plan.md` - Understanding the methodology
-2. `00-planning/00-project_tracking_board.md` - Project tracking and sprints
-3. `01-documentation/Qoomlee_Definition.md` - System definition
-4. `02-architecture/architecture/Qoomlee_C4_L1_Context.svg` - System context
-5. `00-planning/05-mvp_checklist.md` - Current progress and next steps
-
 ## Contributing
 When adding new files:
 1. Place in the appropriate directory
-2. Follow the naming convention
+2. Follow the established naming convention
 3. Update this README if adding new categories
-4. Maintain chronological order with numbering
+4. Consider whether the document belongs in the index
 
 ## Maintenance
 - Keep this README updated when directory structure changes
-- Archive old files in `archive/` directory rather than deleting
-- Use symbolic links for frequently accessed files across directories
+- Use the [Index](./INDEX.md) for comprehensive navigation
+- Archive old files appropriately rather than deleting

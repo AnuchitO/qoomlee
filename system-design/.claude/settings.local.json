@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ls:*)",
-      "Bash(find ./ -name \"*.md\" -exec stat -c \"%Y %n\" {})",
-      "Bash(find ./ -name \"*.md\" -exec ls -la {})"
-    ]
-  }
-}
