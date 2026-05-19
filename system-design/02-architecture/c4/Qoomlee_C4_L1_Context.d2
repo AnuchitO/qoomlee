@@ -57,7 +57,27 @@ qoomlee_ops: Qoomlee Ops System {
   style.font-color: "#FFFFFF"
   style.stroke: "#1A3557"
   style.border-radius: 8
-  tooltip: "Internal airline operations platform — booking management, check-in, boarding, payments, flight ops view"
+  tooltip: "Internal airline operations platform — booking management, check-in, boarding, payments, passenger data management, flight ops view"
+}
+
+# ── Infrastructure Components ───────────────────────────────────────────────────────
+
+monitoring_infra: Monitoring Infrastructure {
+  shape: rectangle
+  style.fill: "#059669"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#047857"
+  style.border-radius: 8
+  tooltip: "Prometheus + Grafana + Jaeger — Metrics collection, visualization and distributed tracing across all services"
+}
+
+secrets_infra: Secrets Management {
+  shape: rectangle
+  style.fill: "#7C3AED"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#6D28D9"
+  style.border-radius: 8
+  tooltip: "HashiCorp Vault — Secure storage and retrieval of API keys, database passwords, and other sensitive configuration"
 }
 
 # ── External Systems ──────────────────────────────────────────────────────────
@@ -136,4 +156,18 @@ email_sms -> passenger: "E-ticket, boarding pass,\nSMS confirmation" {
   style.stroke: "#9CA3AF"
   style.stroke-dash: 4
   style.font-color: "#6B7280"
+}
+
+# ── Infrastructure Connections ───────────────────────────────────────────────
+
+qoomlee_ops -> monitoring_infra: "Send metrics and traces" {
+  style.stroke: "#059669"
+  style.stroke-dash: 3
+  style.font-color: "#047857"
+}
+
+qoomlee_ops -> secrets_infra: "Retrieve secrets" {
+  style.stroke: "#7C3AED"
+  style.stroke-dash: 3
+  style.font-color: "#6D28D9"
 }

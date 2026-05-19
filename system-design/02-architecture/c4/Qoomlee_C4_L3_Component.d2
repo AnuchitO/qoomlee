@@ -2,10 +2,70 @@ direction: down
 
 title: |md
   # Qoomlee — C4 Level 3: Component Diagram
-  *Booking Service (Java/Kotlin) + Payment Service (Golang) internals*
+  *Booking Service (Java/Kotlin) + Payment Service (Golang) + Infrastructure internals*
 |
 
-# ── Inbound ───────────────────────────────────────────────────────────────────
+# ── Infrastructure Components ───────────────────────────────────────────────────────────
+
+monitoring_svc: Monitoring & Observability {
+  shape: rectangle
+  style.fill: "#059669"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#047857"
+  style.stroke-width: 2
+  style.border-radius: 8
+  tooltip: "Prometheus + Grafana + Jaeger — Metrics collection, visualization and distributed tracing across all services. Implements health checks and alerting."
+
+  prometheus: Prometheus {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Metrics collection and storage"
+  }
+
+  grafana: Grafana {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Visualization and dashboards"
+  }
+
+  jaeger: Jaeger {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Distributed tracing"
+  }
+}
+
+secrets_svc: Secrets Management {
+  shape: rectangle
+  style.fill: "#7C3AED"
+  style.font-color: "#FFFFFF"
+  style.stroke: "#6D28D9"
+  style.stroke-width: 2
+  style.border-radius: 8
+  tooltip: "HashiCorp Vault — Secure storage and retrieval of API keys, database passwords, and other sensitive configuration. Automatic rotation capabilities."
+
+  vault_server: Vault Server {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Vault server for secrets management"
+  }
+
+  vault_agent: Vault Agent {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Sidecar agent for secret retrieval"
+  }
+}
 
 api_gw: API Gateway {
   shape: rectangle
@@ -77,6 +137,14 @@ booking: Booking Service (Java / Kotlin) {
     style.border-radius: 4
     tooltip: "Spring State Machine — enforces valid transitions: PENDING→CONFIRMED (on payment), CONFIRMED→CHECKED_IN (on check-in), CONFIRMED→CANCELLED (on cancel). Rejects invalid transitions."
   }
+
+  circuit_breaker: Circuit Breaker {
+    shape: rectangle
+    style.fill: "#1A3557"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Circuit breaker pattern implementation for external service calls"
+  }
 }
 
 # ── Payment Service ───────────────────────────────────────────────────────────
@@ -134,6 +202,227 @@ payment: Payment Service (Golang) {
     style.border-radius: 4
     tooltip: "PostgreSQL CRUD on payments, transactions, refunds tables. No raw card data stored — only Omise charge IDs and masked card last-4."
   }
+
+  circuit_breaker: Circuit Breaker {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Circuit breaker for external payment service calls"
+  }
+
+  retry_mechanism: Retry Handler {
+    shape: rectangle
+    style.fill: "#92540A"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Retry mechanism for failed external service calls"
+  }
+}
+
+# ── Check-in Service ───────────────────────────────────────────────────────────
+
+checkin: Check-In Service (Golang) {
+  style.fill: "#FEE7EA"
+  style.stroke: "#B91C1C"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  checkin_handler: CheckInHandler {
+    shape: rectangle
+    style.fill: "#B91C1C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles check-in requests, manages check-in state, assigns seats, generates boarding passes"
+  }
+
+  boarding_pass_gen: BoardingPassGenerator {
+    shape: rectangle
+    style.fill: "#B91C1C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Generates IATA BCBP compliant boarding passes with QR codes"
+  }
+
+  manifest_manager: ManifestManager {
+    shape: rectangle
+    style.fill: "#B91C1C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages flight manifests and passenger lists for gate operations"
+  }
+
+  circuit_breaker: Circuit Breaker {
+    shape: rectangle
+    style.fill: "#B91C1C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Circuit breaker for external service calls"
+  }
+}
+
+# ── Passenger Service ───────────────────────────────────────────────────────────
+
+passenger: Passenger Service (Java / Kotlin) {
+  style.fill: "#F0F9FF"
+  style.stroke: "#0369A1"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  passenger_controller: PassengerController {
+    shape: rectangle
+    style.fill: "#0369A1"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages passenger profile creation, updates, and retrieval operations"
+  }
+
+  passenger_validator: PassengerValidator {
+    shape: rectangle
+    style.fill: "#0369A1"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Validates passenger data including personal information, documents, and travel requirements"
+  }
+
+  special_req_handler: SpecialRequirementsHandler {
+    shape: rectangle
+    style.fill: "#0369A1"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages special passenger requirements like dietary needs, mobility assistance, medical needs"
+  }
+
+  document_manager: DocumentManager {
+    shape: rectangle
+    style.fill: "#0369A1"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles passenger document storage and verification (passports, visas, vaccination certificates)"
+  }
+
+  passenger_repo: PassengerRepository {
+    shape: rectangle
+    style.fill: "#0EA5E9"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "JPA/Hibernate repository — CRUD on passengers table. Manages passenger data integrity."
+  }
+
+  circuit_breaker: Circuit Breaker {
+    shape: rectangle
+    style.fill: "#0369A1"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Circuit breaker for external service calls"
+  }
+}
+
+# ── Flight Service ───────────────────────────────────────────────────────────
+
+flight: Flight Service (Java / Kotlin) {
+  style.fill: "#FEF7ED"
+  style.stroke: "#D97706"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  flight_controller: FlightController {
+    shape: rectangle
+    style.fill: "#D97706"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages flight creation, scheduling, and status updates"
+  }
+
+  route_manager: RouteManager {
+    shape: rectangle
+    style.fill: "#D97706"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages flight routes and destinations"
+  }
+
+  aircraft_config: AircraftConfigService {
+    shape: rectangle
+    style.fill: "#D97706"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Manages aircraft configurations and seat maps"
+  }
+
+  circuit_breaker: Circuit Breaker {
+    shape: rectangle
+    style.fill: "#D97706"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Circuit breaker for external service calls"
+  }
+}
+
+# ── Identity Service ───────────────────────────────────────────────────────────
+
+identity: Identity Service (Golang) {
+  style.fill: "#EDE9FE"
+  style.stroke: "#7C3AED"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  auth_handler: AuthenticationHandler {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles user authentication and JWT token management"
+  }
+
+  rbac_manager: RBACManager {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Role-based access control management"
+  }
+
+  audit_logger: AuditLogger {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Logs all user actions and system events for compliance"
+  }
+}
+
+# ── Notification Service ───────────────────────────────────────────────────────────
+
+notification: Notification Service (Golang) {
+  style.fill: "#ECFDF5"
+  style.stroke: "#059669"
+  style.stroke-width: 2
+  style.border-radius: 10
+
+  email_sender: EmailSender {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles email notifications via SendGrid"
+  }
+
+  sms_sender: SMSSender {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Handles SMS notifications via Twilio/True Move H"
+  }
+
+  event_consumer: EventConsumer {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 4
+    tooltip: "Consumes events from Redis Streams and triggers notifications"
+  }
 }
 
 # ── Data Stores ───────────────────────────────────────────────────────────────
@@ -160,49 +449,99 @@ omise_api: Omise API {
   style.stroke: "#374151"
 }
 
-notif: Notification Service {
-  shape: rectangle
-  style.fill: "#6B7280"
-  style.font-color: "#FFFFFF"
-  style.border-radius: 6
-  style.stroke: "#374151"
-}
-
-# ── Internal Booking Connections ──────────────────────────────────────────────
+# ── Internal Service Connections ──────────────────────────────────────────────
 
 api_gw -> booking.flight_search: "GET /flights/search"
 api_gw -> booking.pnr_manager: "POST /bookings\nGET /bookings/:id\nPATCH /bookings/:id\nDELETE /bookings/:id"
 api_gw -> payment.charge_handler: "POST /payments/charge"
 api_gw -> payment.qr_handler: "POST /payments/promptpay"
 api_gw -> payment.refund_handler: "POST /payments/refund"
+api_gw -> checkin.checkin_handler: "POST /checkin\nGET /checkin/_details"
+api_gw -> flight.flight_controller: "POST /flights\nGET /flights\nPUT /flights/:id/status"
+api_gw -> identity.auth_handler: "POST /auth/login\nPOST /auth/logout\nPOST /auth/refresh"
 
 booking.pnr_manager -> booking.state_machine: "Validate & execute\nstate transition"
 booking.pnr_manager -> booking.seat_inventory: "Request seat lock\nor confirm seat"
 booking.pnr_manager -> booking.fare_engine: "Calculate modification\nor cancellation fee"
 booking.pnr_manager -> booking.booking_repo: "Persist booking\nstate change"
 booking.pnr_manager -> booking.event_publisher: "Emit domain event\non state change"
+booking.pnr_manager -> booking.circuit_breaker: "Apply circuit\nbreaker pattern"
 
 booking.seat_inventory -> redis: "SET seat_lock:{flightId}:{seat}\nEX 480 (8-min TTL)"
 booking.booking_repo -> pg: "INSERT/UPDATE/SELECT\nbookings, passengers,\nseat_inventory"
 booking.event_publisher -> redis: "XADD booking_events\n[Redis Stream]"
 
-# ── Payment Connections ───────────────────────────────────────────────────────
+checkin.checkin_handler -> checkin.boarding_pass_gen: "Generate boarding pass\nwith IATA BCBP format"
+checkin.checkin_handler -> checkin.manifest_manager: "Update flight manifest\nwith checked-in passengers"
+checkin.checkin_handler -> checkin.circuit_breaker: "Apply circuit\nbreaker pattern"
+checkin.manifest_manager -> pg: "UPDATE flight_manifests\nfor gate operations"
+
+flight.flight_controller -> flight.route_manager: "Validate route\nrequirements"
+flight.flight_controller -> flight.aircraft_config: "Configure\naircraft seat map"
+flight.flight_controller -> flight.circuit_breaker: "Apply circuit\nbreaker pattern"
+flight.flight_controller -> pg: "INSERT/UPDATE/SELECT\nflights, routes, aircraft"
+
+identity.auth_handler -> identity.rbac_manager: "Validate user\npermissions"
+identity.auth_handler -> identity.audit_logger: "Log authentication\nattempt"
+identity.auth_handler -> pg: "SELECT users, roles,\nsessions from staff table"
+
+notification.email_sender -> notification.event_consumer: "Process email\nnotification events"
+notification.sms_sender -> notification.event_consumer: "Process SMS\nnotification events"
+notification.event_consumer -> redis: "XREAD notification_events\n[Redis Stream Consumer]"
 
 payment.charge_handler -> payment.payment_repo: "Record transaction"
+payment.charge_handler -> payment.circuit_breaker: "Apply circuit\nbreaker pattern"
+payment.charge_handler -> payment.retry_mechanism: "Handle retries\nfor failed calls"
 payment.charge_handler -> omise_api: "POST /charges\n[Omise REST API]"
 
 payment.qr_handler -> payment.payment_repo: "Record pending transaction"
+payment.qr_handler -> payment.circuit_breaker: "Apply circuit\nbreaker pattern"
 payment.qr_handler -> omise_api: "POST /charges (source.type=promptpay)"
 
 payment.webhook_handler -> payment.payment_repo: "Update transaction status"
 payment.webhook_handler -> booking.pnr_manager: "Confirm booking\nPATCH /bookings/:id/confirm"
+payment.webhook_handler -> payment.circuit_breaker: "Apply circuit\nbreaker pattern"
 
 payment.refund_handler -> omise_api: "POST /charges/:id/refunds"
 payment.refund_handler -> payment.payment_repo: "Record refund"
+payment.refund_handler -> payment.circuit_breaker: "Apply circuit\nbreaker pattern"
 
 payment.reconciler -> payment.payment_repo: "Aggregate daily transactions"
 payment.payment_repo -> pg: "INSERT/UPDATE/SELECT\npayments, transactions, refunds"
 
-# ── Cross-service async ───────────────────────────────────────────────────────
+# ── Passenger Service Connections ───────────────────────────────────────────────
 
-redis -> notif: "XREAD booking_events\n[async consumer]" {style.stroke-dash: 4; style.stroke: "#9CA3AF"}
+api_gw -> passenger.passenger_controller: "POST /passengers\nGET /passengers/:id\nPUT /passengers/:id\nPOST /passengers/batch"
+passenger.passenger_controller -> passenger.passenger_validator: "Validate\npassenger data"
+passenger.passenger_controller -> passenger.special_req_handler: "Process special\nrequirements"
+passenger.passenger_controller -> passenger.document_manager: "Handle\ntravel documents"
+passenger.passenger_controller -> passenger.passenger_repo: "Persist passenger\ndata to database"
+passenger.passenger_controller -> passenger.circuit_breaker: "Apply circuit\nbreaker pattern"
+passenger.passenger_repo -> pg: "INSERT/UPDATE/SELECT\npassengers table"
+
+booking -> passenger.passenger_controller: "Validate passenger\nbefore booking [REST]" {style.stroke: "#0369A1"}
+checkin -> passenger.passenger_controller: "Retrieve passenger\ndata for check-in [REST]" {style.stroke: "#0369A1"}
+
+# ── Infrastructure Connections ───────────────────────────────────────────────
+
+booking -> secrets_svc.vault_agent: "Retrieve service\nsecrets [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+payment -> secrets_svc.vault_agent: "Retrieve payment\nAPI keys [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+checkin -> secrets_svc.vault_agent: "Retrieve service\nsecrets [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+flight -> secrets_svc.vault_agent: "Retrieve service\nsecrets [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+passenger -> secrets_svc.vault_agent: "Retrieve service\nsecrets [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+identity -> secrets_svc.vault_agent: "Retrieve service\nsecrets [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+notification -> secrets_svc.vault_agent: "Retrieve provider\nAPI keys [Vault API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+
+booking -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+payment -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+checkin -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+flight -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+passenger -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+identity -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+notification -> monitoring_svc.prometheus: "Send metrics\n[Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+api_gw -> monitoring_svc.prometheus: "Send gateway\nmetrics [Prometheus endpoint]" {style.stroke: "#059669"; style.stroke-dash: 3}
+
+booking -> monitoring_svc.jaeger: "Send trace\n[Span data]" {style.stroke: "#059669"; style.stroke-dash: 3}
+payment -> monitoring_svc.jaeger: "Send trace\n[Span data]" {style.stroke: "#059669"; style.stroke-dash: 3}
+checkin -> monitoring_svc.jaeger: "Send trace\n[Span data]" {style.stroke: "#059669"; style.stroke-dash: 3}
+passenger -> monitoring_svc.jaeger: "Send trace\n[Span data]" {style.stroke: "#059669"; style.stroke-dash: 3}

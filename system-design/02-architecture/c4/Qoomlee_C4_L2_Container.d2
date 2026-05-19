@@ -13,7 +13,7 @@ staff: Staff Browser {
   style.font-color: "#FFFFFF"
   style.stroke: "#374151"
   style.border-radius: 6
-  label: "Staff Browser\n(Ground Agent / Gate Officer / Ops Admin)\nNext.js SSR served app"
+  label: "Staff Browser\\n(Ground Agent / Gate Officer / Ops Admin)\\nNext.js SSR served app"
 }
 
 # ── Qoomlee System Boundary ───────────────────────────────────────────────────
@@ -72,6 +72,14 @@ qoomlee: Qoomlee Ops Platform {
     tooltip: "Java / Kotlin — Flight schedule CRUD, route configuration, aircraft seat map config, flight status management. Owns flights + routes + aircraft tables."
   }
 
+  passenger_svc: Passenger Service {
+    shape: rectangle
+    style.fill: "#1E5F8C"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Java / Kotlin — Passenger profile management, passenger data validation, special requirements handling, passenger document management. Owns passengers table."
+  }
+
   identity_svc: Identity Service {
     shape: rectangle
     style.fill: "#1E5F8C"
@@ -86,6 +94,23 @@ qoomlee: Qoomlee Ops Platform {
     style.font-color: "#FFFFFF"
     style.border-radius: 6
     tooltip: "Golang — Async email (SendGrid) and SMS (Twilio/True Move H) dispatch. Consumes events from Redis Streams. Owns notification_log table."
+  }
+
+  # NEW INFRASTRUCTURE COMPONENTS ADDED FOR COMPLETENESS
+  monitoring_svc: Monitoring & Observability {
+    shape: rectangle
+    style.fill: "#059669"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "Prometheus + Grafana + Jaeger — Metrics collection, visualization and distributed tracing across all services. Implements health checks and alerting."
+  }
+
+  secrets_svc: Secrets Management {
+    shape: rectangle
+    style.fill: "#7C3AED"
+    style.font-color: "#FFFFFF"
+    style.border-radius: 6
+    tooltip: "HashiCorp Vault — Secure storage and retrieval of API keys, database passwords, and other sensitive configuration. Automatic rotation capabilities."
   }
 
   # ── Data Stores ────────────────────────────────────────────────────────────
@@ -131,40 +156,65 @@ sms_provider: SMS Provider {
   style.font-color: "#FFFFFF"
   style.border-radius: 6
   style.stroke: "#374151"
-  label: "SMS Provider\n(Twilio / True Move H)"
+  label: "SMS Provider\\n(Twilio / True Move H)"
 }
 
 # ── Connections ───────────────────────────────────────────────────────────────
 
 staff -> qoomlee.frontend: "HTTPS — web browser" {style.stroke: "#1A3557"}
 
-qoomlee.frontend -> qoomlee.gateway: "HTTPS REST — API calls\n(auth header: Bearer JWT)" {style.stroke: "#2E6DA4"}
+qoomlee.frontend -> qoomlee.gateway: "HTTPS REST — API calls\\n(auth header: Bearer JWT)" {style.stroke: "#2E6DA4"}
 
-qoomlee.gateway -> qoomlee.identity_svc: "Validate JWT / check role\n[REST]" {style.stroke: "#6B7280"; style.stroke-dash: 3}
-qoomlee.gateway -> qoomlee.booking_svc: "Route booking requests\n[REST]" {style.stroke: "#1E5F8C"}
-qoomlee.gateway -> qoomlee.checkin_svc: "Route check-in requests\n[REST]" {style.stroke: "#1E5F8C"}
-qoomlee.gateway -> qoomlee.payment_svc: "Route payment requests\n[REST]" {style.stroke: "#1E5F8C"}
-qoomlee.gateway -> qoomlee.flight_svc: "Route flight/schedule requests\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.identity_svc: "Validate JWT / check role\\n[REST]" {style.stroke: "#6B7280"; style.stroke-dash: 3}
+qoomlee.gateway -> qoomlee.booking_svc: "Route booking requests\\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.checkin_svc: "Route check-in requests\\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.payment_svc: "Route payment requests\\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.flight_svc: "Route flight/schedule requests\\n[REST]" {style.stroke: "#1E5F8C"}
+qoomlee.gateway -> qoomlee.passenger_svc: "Route passenger profile requests\\n[REST]" {style.stroke: "#1E5F8C"}
 
-qoomlee.booking_svc -> qoomlee.postgres: "Read/write bookings,\npassengers, seat_inventory" {style.stroke: "#2E6DA4"}
-qoomlee.booking_svc -> qoomlee.redis: "Seat lock TTL\n(8-min expiry)" {style.stroke: "#D97706"}
-qoomlee.booking_svc -> qoomlee.notification_svc: "Publish: booking_confirmed,\nbooking_cancelled [Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+qoomlee.booking_svc -> qoomlee.postgres: "Read/write bookings,\\npassengers, seat_inventory" {style.stroke: "#2E6DA4"}
+qoomlee.booking_svc -> qoomlee.redis: "Seat lock TTL\\n(8-min expiry)" {style.stroke: "#D97706"}
+qoomlee.booking_svc -> qoomlee.notification_svc: "Publish: booking_confirmed,\\nbooking_cancelled [Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+qoomlee.booking_svc -> qoomlee.passenger_svc: "Validate passenger\\ndata [REST]" {style.stroke: "#1E5F8C"}
 
-qoomlee.checkin_svc -> qoomlee.postgres: "Read/write checkins,\nboarding_passes, manifests" {style.stroke: "#2E6DA4"}
-qoomlee.checkin_svc -> qoomlee.redis: "Manifest cache\n(offline fallback)" {style.stroke: "#D97706"}
-qoomlee.checkin_svc -> qoomlee.notification_svc: "Publish: boarding_pass_ready\n[Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+qoomlee.checkin_svc -> qoomlee.postgres: "Read/write checkins,\\nboarding_passes, manifests" {style.stroke: "#2E6DA4"}
+qoomlee.checkin_svc -> qoomlee.redis: "Manifest cache\\n(offline fallback)" {style.stroke: "#D97706"}
+qoomlee.checkin_svc -> qoomlee.notification_svc: "Publish: boarding_pass_ready\\n[Redis Stream]" {style.stroke: "#9CA3AF"; style.stroke-dash: 3}
+qoomlee.checkin_svc -> qoomlee.passenger_svc: "Retrieve passenger\\ndata [REST]" {style.stroke: "#1E5F8C"}
 
-qoomlee.payment_svc -> qoomlee.postgres: "Read/write payments,\ntransactions, refunds" {style.stroke: "#2E6DA4"}
-qoomlee.payment_svc -> qoomlee.booking_svc: "Confirm booking on\npayment success [REST event]" {style.stroke: "#E8A020"}
-qoomlee.payment_svc -> omise: "Card charge, QR generate,\nrefund [HTTPS REST]" {style.stroke: "#E8A020"}
+qoomlee.payment_svc -> qoomlee.postgres: "Read/write payments,\\ntransactions, refunds" {style.stroke: "#2E6DA4"}
+qoomlee.payment_svc -> qoomlee.booking_svc: "Confirm booking on\\npayment success [REST event]" {style.stroke: "#E8A020"}
+qoomlee.payment_svc -> omise: "Card charge, QR generate,\\nrefund [HTTPS REST]" {style.stroke: "#E8A020"}
 
-qoomlee.flight_svc -> qoomlee.postgres: "Read/write flights,\nroutes, aircraft, status" {style.stroke: "#2E6DA4"}
+qoomlee.flight_svc -> qoomlee.postgres: "Read/write flights,\\nroutes, aircraft, status" {style.stroke: "#2E6DA4"}
 
-qoomlee.identity_svc -> qoomlee.postgres: "Read/write staff,\naudit_log, sessions" {style.stroke: "#2E6DA4"}
-qoomlee.identity_svc -> qoomlee.redis: "JWT session cache\n+ invalidation" {style.stroke: "#D97706"}
+qoomlee.passenger_svc -> qoomlee.postgres: "Read/write passenger\\ndata, documents, special requirements" {style.stroke: "#2E6DA4"}
+qoomlee.passenger_svc -> qoomlee.redis: "Cache passenger\\nprofiles [TTL]" {style.stroke: "#D97706"}
 
-qoomlee.notification_svc -> qoomlee.redis: "Consume events\n[Redis Streams]" {style.stroke: "#D97706"}
-qoomlee.notification_svc -> email_provider: "Send e-ticket, boarding pass\n[SMTP / API]" {style.stroke: "#6B7280"}
-qoomlee.notification_svc -> sms_provider: "Send OTP, booking confirm,\ndelay alert [API]" {style.stroke: "#6B7280"}
+qoomlee.identity_svc -> qoomlee.postgres: "Read/write staff,\\naudit_log, sessions" {style.stroke: "#2E6DA4"}
+qoomlee.identity_svc -> qoomlee.redis: "JWT session cache\\n+ invalidation" {style.stroke: "#D97706"}
 
-omise -> qoomlee.payment_svc: "PromptPay payment\nwebhook [HTTPS POST]" {style.stroke: "#E8A020"; style.stroke-dash: 3}
+qoomlee.notification_svc -> qoomlee.redis: "Consume events\\n[Redis Streams]" {style.stroke: "#D97706"}
+qoomlee.notification_svc -> email_provider: "Send e-ticket, boarding pass\\n[SMTP / API]" {style.stroke: "#6B7280"}
+qoomlee.notification_svc -> sms_provider: "Send OTP, booking confirm,\\ndelay alert [API]" {style.stroke: "#6B7280"}
+
+omise -> qoomlee.payment_svc: "PromptPay payment\\nwebhook [HTTPS POST]" {style.stroke: "#E8A020"; style.stroke-dash: 3}
+
+# NEW CONNECTIONS FOR MISSING COMPONENTS
+qoomlee.monitoring_svc -> qoomlee.booking_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.checkin_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.payment_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.flight_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.passenger_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.identity_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.gateway: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+qoomlee.monitoring_svc -> qoomlee.notification_svc: "Collect metrics\\n[Prometheus scrape]" {style.stroke: "#059669"; style.stroke-dash: 3}
+
+qoomlee.booking_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.checkin_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.payment_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.flight_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.passenger_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.identity_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.gateway -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
+qoomlee.notification_svc -> qoomlee.secrets_svc: "Retrieve secrets\\n[REST API]" {style.stroke: "#7C3AED"; style.stroke-dash: 3}
